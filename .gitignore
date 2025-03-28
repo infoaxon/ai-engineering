@@ -1,0 +1,37 @@
+# Ignore PDF documents
+*.pdf
+
+# macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Logs and databases
+*.log
+*.sqlite
+*.sqlite3
+
+# Environment files
+.env
+.venv
+.env.local
+
+# Python-specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node.js
+node_modules/
+
+# IDE-related files
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime*
+
+# Any Vector Databases
+chroma_db/
