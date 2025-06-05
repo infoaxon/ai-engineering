@@ -1,0 +1,108 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dynamic React Form</title>
+  <!-- React and ReactDOM via CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel for in-browser JSX compilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; }
+    .form-container { max-width: 600px; margin: auto; }
+    label { display: block; margin-bottom: 0.25rem; font-weight: bold; }
+    input, textarea, select { width: 100%; padding: 0.5rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 0.75rem 1.5rem; background: #0070f3; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    .submitted { background: #f9f9f9; padding: 1rem; border-radius: 4px; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div id="root" class="form-container"></div>
+
+  <script type="text/babel">
+    const config = {
+      Qs: [
+        [
+          { label: 'Details fetched from {{documentType}}', key: 'KYCDETAILS', display: true, type: 'kyc-details', placeholder: 'Enter details...' },
+          { label: 'Email Address', key: 'EMAIL', display: true, type: 'email', placeholder: 'Enter your email', mandatory: true },
+          { label: 'Occupation', key: 'OCCUPATION', display: true, type: 'select', mandatory: true,
+            source: [ { key: 'doctor', displayText: 'Doctor' }, { key: 'engineer', displayText: 'Engineer' }, { key: 'teacher', displayText: 'Teacher' } ]
+          }
+        ]
+      ]
+    };
+
+    const { useState } = React;
+
+    function FormField({ field, value, onChange }) {
+      const commonProps = {
+        id: field.key,
+        name: field.key,
+        placeholder: field.placeholder || '',
+        value: value || '',
+        onChange: (e) => onChange(field.key, e.target.value)
+      };
+
+      switch (field.type) {
+        case 'kyc-details':
+          return (
+            <div key={field.key}>
+              <label htmlFor={field.key}>{field.label}</label>
+              <textarea {...commonProps} rows={4}></textarea>
+            </div>
+          );
+        case 'email':
+          return (
+            <div key={field.key}>
+              <label htmlFor={field.key}>{field.label}{field.mandatory && ' *'}</label>
+              <input type="email" required={field.mandatory} {...commonProps} />
+            </div>
+          );
+        case 'select':
+          return (
+            <div key={field.key}>
+              <label htmlFor={field.key}>{field.label}{field.mandatory && ' *'}</label>
+              <select {...commonProps} onChange={(e) => onChange(field.key, e.target.value)}>
+                <option value="">Select</option>
+                {field.source.map(opt => <option key={opt.key} value={opt.key}>{opt.displayText}</option>)}
+              </select>
+            </div>
+          );
+        default:
+          return null;
+      }
+    }
+
+    function DynamicForm() {
+      const [formData, setFormData] = useState({});
+      const [submitted, setSubmitted] = useState(false);
+
+      const handleChange = (key, val) => setFormData(prev => ({ ...prev, [key]: val }));
+      const handleSubmit = (e) => { e.preventDefault(); setSubmitted(true); };
+
+      const fields = config.Qs.flat();
+
+      return (
+        <>
+          <form onSubmit={handleSubmit} style={{ display: submitted ? 'none' : 'block' }}>
+            {fields.map(f => f.display && <FormField key={f.key} field={f} value={formData[f.key]} onChange={handleChange} />)}
+            <button type="submit">Submit</button>
+          </form>
+          {submitted && (
+            <div className="submitted">
+              <h3>Submitted Data</h3>
+              <pre>{JSON.stringify(formData, null, 2)}</pre>
+            </div>
+          )}
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<DynamicForm />);
+  </script>
+</body>
+</html>
+
