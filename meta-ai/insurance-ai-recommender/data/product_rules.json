@@ -1,0 +1,10 @@
+[
+  {
+    "product_id": "abc123",
+    "rules": [
+      "Applicable for sum insured between 5L and 10L",
+      "Vehicle age must be less than 5 years"
+    ]
+  }
+]
+

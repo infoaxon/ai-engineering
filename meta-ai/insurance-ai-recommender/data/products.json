@@ -1,0 +1,10 @@
+[
+  {
+    "product_id": "abc123",
+    "insurer": "HDFC ERGO",
+    "name": "Comprehensive Car Insurance",
+    "description": "Covers damage to own car and third party. Includes zero depreciation...",
+    "features": ["zero dep", "roadside", "personal accident"]
+  }
+]
+

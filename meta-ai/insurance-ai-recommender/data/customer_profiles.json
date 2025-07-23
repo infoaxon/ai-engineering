@@ -1,0 +1,12 @@
+{
+  "customer_id": "cust001",
+  "name": "Rahul Sharma",
+  "age": 35,
+  "vehicle": {
+    "make": "Maruti",
+    "model": "Baleno",
+    "year": 2022
+  },
+  "sum_insured": 600000
+}
+
