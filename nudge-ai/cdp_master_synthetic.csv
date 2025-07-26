@@ -1,0 +1,11 @@
+recordId,name,email,age,numOfLogins30d,totalCustomerLifetimeValue,propensityScore,segmentFlag,lastPolicyEndDate
+RID0000,User0000,user0000@example.com,56,5,376976.89,0.34,DormantProspect,2024-07-07 04:07:40.570185
+RID0001,User0001,user0001@example.com,69,1,81991.75,0.15,HighValueEngaged,2023-10-31 04:07:40.570185
+RID0002,User0002,user0002@example.com,46,1,140598.73,0.35,AtRiskLapsed,2023-10-23 04:07:40.570185
+RID0003,User0003,user0003@example.com,32,9,31457.29,0.03,SeniorStrained,2024-04-18 04:07:40.570185
+RID0004,User0004,user0004@example.com,60,5,275415.38,0.12,CampaignResponsive,2024-04-30 04:07:40.570185
+RID0005,User0005,user0005@example.com,25,1,75573.07,0.29,SeniorStrained,2024-02-23 04:07:40.570185
+RID0006,User0006,user0006@example.com,78,6,38039.2,0.2,CampaignResponsive,2023-08-30 04:07:40.570185
+RID0007,User0007,user0007@example.com,38,12,138916.55,0.34,YoungUrban,2024-01-22 04:07:40.570185
+RID0008,User0008,user0008@example.com,56,5,298488.99,0.46,AtRiskLapsed,2025-03-31 04:07:40.570185
+RID0009,User0009,user0009@example.com,75,6,132224.34,0.45,YoungUrban,2023-11-19 04:07:40.570185
