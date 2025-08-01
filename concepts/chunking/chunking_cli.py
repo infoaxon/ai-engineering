@@ -10,6 +10,7 @@ def sliding_window_chunking(text: str, chunk_size: int, overlap: int):
         i += chunk_size - overlap
     return chunks
 
+
 # Large text
 large_document = """
 Insurance is a contract between an insurer and a policyholder. It provides financial protection against losses.
@@ -21,6 +22,7 @@ Home insurance protects your property against fire, theft, and natural disasters
 Commercial insurance provides coverage for businesses, safeguarding against operational risks.
 """ * 5
 
+
 def main():
     while True:
         # Take user input
@@ -30,17 +32,18 @@ def main():
         except ValueError:
             print("Please enter valid numbers.")
             continue
-        
+
         chunks = sliding_window_chunking(large_document, chunk_size, overlap)
-        
+
         print(f"\n=== Generated {len(chunks)} Chunks ===")
         for idx, c in enumerate(chunks[:5], 1):  # Show only first 5 chunks
             print(f"\n[Chunk {idx}]:\n{c}\n{'-'*40}")
-        
-        choice = input("\nDo you want to try different values? (y/n): ").lower()
+
+        choice = input(
+            "\nDo you want to try different values? (y/n): ").lower()
         if choice != 'y':
             break
 
+
 if __name__ == "__main__":
     main()
-

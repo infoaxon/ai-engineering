@@ -12,6 +12,7 @@ corpus = [
     "this is an encoder demo"
 ]
 
+
 def build_vocab(corpus):
     vocab = {"<pad>": 0, "<unk>": 1, "<sos>": 2, "<eos>": 3}
     idx = 4
@@ -22,6 +23,7 @@ def build_vocab(corpus):
                 idx += 1
     return vocab
 
+
 vocab = build_vocab(corpus)
 inv_vocab = {i: w for w, i in vocab.items()}
 vocab_size = len(vocab)
@@ -29,6 +31,8 @@ vocab_size = len(vocab)
 # ----------------------------
 # Encoder Definition
 # ----------------------------
+
+
 class Encoder(nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_dim):
         super().__init__()
@@ -43,6 +47,8 @@ class Encoder(nn.Module):
 # ----------------------------
 # Decoder Definition
 # ----------------------------
+
+
 class Decoder(nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_dim):
         super().__init__()
@@ -60,10 +66,13 @@ class Decoder(nn.Module):
 # ----------------------------
 # Helper Function: Encode + Decode
 # ----------------------------
+
+
 def run_seq2seq_demo(input_sentence, max_len=10):
     tokens = input_sentence.lower().split()
     token_ids = [vocab.get(tok, vocab["<unk>"]) for tok in tokens]
-    input_tensor = torch.tensor(token_ids).unsqueeze(1)  # [seq_len, batch_size]
+    input_tensor = torch.tensor(token_ids).unsqueeze(
+        1)  # [seq_len, batch_size]
 
     # Encode
     _, hidden, cell = encoder(input_tensor)
@@ -84,6 +93,7 @@ def run_seq2seq_demo(input_sentence, max_len=10):
 
     return tokens, decoded_tokens
 
+
 # ----------------------------
 # Initialize and Run
 # ----------------------------
@@ -97,4 +107,3 @@ if __name__ == "__main__":
     input_tokens, output_tokens = run_seq2seq_demo(sentence)
     print(f"\n🔡 Input Tokens: {input_tokens}")
     print(f"🗣️ Generated Output Tokens: {output_tokens}")
-

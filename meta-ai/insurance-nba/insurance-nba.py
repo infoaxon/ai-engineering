@@ -18,12 +18,15 @@ data = {
 df = pd.DataFrame(data)
 
 # --- Rule-based recommendation engine ---
+
+
 def get_recommendations(customer):
     recs = []
-    
+
     # Renewal Reminder
     if customer['policy_expiring_in_days'] <= 30:
-        recs.append(" Renew your policy before it expires to avoid coverage gaps.")
+        recs.append(
+            " Renew your policy before it expires to avoid coverage gaps.")
 
     # Re-engagement
     if customer['last_login_days_ago'] > 30 or customer['missed_notifications'] > 2:
@@ -41,6 +44,7 @@ def get_recommendations(customer):
         recs.append(" Protect your family's future with a life insurance plan.")
 
     return recs
+
 
 # --- Streamlit App ---
 st.title("Insurance Next Best Action Demo")
@@ -63,4 +67,3 @@ if recommendations:
         st.markdown(f"- {rec}")
 else:
     st.info("No recommendations at this time.")
-

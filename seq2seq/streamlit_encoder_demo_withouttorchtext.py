@@ -15,6 +15,8 @@ corpus = [
 ]
 
 # Build vocabulary
+
+
 def build_vocab(corpus):
     vocab = {"<pad>": 0, "<unk>": 1}
     idx = 2
@@ -25,22 +27,26 @@ def build_vocab(corpus):
                 idx += 1
     return vocab
 
+
 vocab = build_vocab(corpus)
 inv_vocab = {i: w for w, i in vocab.items()}
 
 # ----------------------------
 # Encoder Definition
 # ----------------------------
+
+
 class Encoder(nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_dim):
         super().__init__()
         self.embedding = nn.Embedding(vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, hidden_dim)
-        
+
     def forward(self, input_seq):
         embedded = self.embedding(input_seq)
         outputs, (hidden, cell) = self.lstm(embedded)
         return embedded, outputs, hidden, cell
+
 
 embedding_dim = 32
 hidden_dim = 64
@@ -56,8 +62,9 @@ sentence = st.text_input("Enter a sentence", "i am happy today")
 if sentence:
     tokens = sentence.lower().split()
     token_ids = [vocab.get(tok, vocab["<unk>"]) for tok in tokens]
-    input_tensor = torch.tensor(token_ids).unsqueeze(1)  # [seq_len, batch_size]
-    
+    input_tensor = torch.tensor(token_ids).unsqueeze(
+        1)  # [seq_len, batch_size]
+
     embedded, outputs, hidden, cell = encoder(input_tensor)
 
     st.markdown("### 🔤 Tokenized Input")
@@ -74,8 +81,8 @@ if sentence:
 
     st.markdown("### 🧠 Final Hidden State (Summary Vector)")
     hidden_vector = hidden.squeeze(0).detach().numpy()
-    hidden_df = pd.DataFrame(hidden_vector.reshape(1, -1), columns=[f"h{i+1}" for i in range(hidden_dim)])
+    hidden_df = pd.DataFrame(hidden_vector.reshape(
+        1, -1), columns=[f"h{i+1}" for i in range(hidden_dim)])
     st.dataframe(hidden_df.style.set_precision(4))
 
     st.success("Encoding complete! Try a different sentence.")
-

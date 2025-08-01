@@ -11,6 +11,7 @@ corpus = [
     "this is an encoder demo"
 ]
 
+
 def build_vocab(corpus):
     vocab = {"<pad>": 0, "<unk>": 1}
     idx = 2
@@ -21,12 +22,15 @@ def build_vocab(corpus):
                 idx += 1
     return vocab
 
+
 vocab = build_vocab(corpus)
 inv_vocab = {i: w for w, i in vocab.items()}
 
 # ----------------------------
 # Step 2: Encoder Class
 # ----------------------------
+
+
 class Encoder(nn.Module):
     def __init__(self, vocab_size, embedding_dim, hidden_dim):
         super().__init__()
@@ -38,6 +42,7 @@ class Encoder(nn.Module):
         outputs, (hidden, cell) = self.lstm(embedded)
         return embedded, outputs, hidden, cell
 
+
 # Model setup
 embedding_dim = 32
 hidden_dim = 64
@@ -46,15 +51,20 @@ encoder = Encoder(len(vocab), embedding_dim, hidden_dim)
 # ----------------------------
 # Step 3: Sentence Encoding Function
 # ----------------------------
+
+
 def encode_sentence(sentence):
     tokens = sentence.lower().split()
     token_ids = [vocab.get(tok, vocab["<unk>"]) for tok in tokens]
-    tensor = torch.tensor(token_ids).unsqueeze(1)  # shape: [seq_len, batch_size]
+    tensor = torch.tensor(token_ids).unsqueeze(
+        1)  # shape: [seq_len, batch_size]
     return tokens, token_ids, tensor
 
 # ----------------------------
 # Step 4: Demo Run
 # ----------------------------
+
+
 def run_demo(sentence):
     print(f"\n📝 Input sentence: {sentence}")
     tokens, token_ids, input_tensor = encode_sentence(sentence)
@@ -71,10 +81,10 @@ def run_demo(sentence):
     print("\n🧠 Final Hidden State (Summary Vector):")
     print(hidden.squeeze().detach().numpy())
 
+
 # ----------------------------
 # Entry Point
 # ----------------------------
 if __name__ == "__main__":
     user_input = input("Enter a sentence to encode: ")
     run_demo(user_input)
-

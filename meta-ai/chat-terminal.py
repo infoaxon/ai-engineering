@@ -6,6 +6,7 @@ import requests
 embedding = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 db = Chroma(persist_directory="./chroma_db", embedding_function=embedding)
 
+
 def query_ollama(prompt, model="llama3.2"):
     response = requests.post(
         "http://localhost:11434/api/generate",
@@ -17,6 +18,7 @@ def query_ollama(prompt, model="llama3.2"):
     )
     return response.json()["response"]
 
+
 # Interactive loop
 while True:
     query = input("Ask your insurance question (or 'exit'): ")
@@ -25,7 +27,7 @@ while True:
 
     docs = db.similarity_search(query, k=4)
     context = "\n\n".join([doc.page_content for doc in docs])
-    
+
     full_prompt = f"""You are an insurance assistant.
 Answer the question using the context below. If it's not in the context, say "I don't know."
 
@@ -37,4 +39,3 @@ Question:
 """
     answer = query_ollama(full_prompt)
     print(f"\n Answer:\n{answer}\n")
-

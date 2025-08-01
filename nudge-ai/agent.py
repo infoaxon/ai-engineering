@@ -21,13 +21,17 @@ prompt = PromptTemplate(
 llm = OpenAI(temperature=0.7)
 runnable = RunnableSequence(prompt, llm)
 
+
 def fetch_customers(segment: str):
-    resp = requests.get(f"http://localhost:8000/customers/to_nudge?segment={segment}")
+    resp = requests.get(
+        f"http://localhost:8000/customers/to_nudge?segment={segment}")
     resp.raise_for_status()
     return resp.json()
 
+
 def send_nudge(to: str, body: str):
     print(f"\n--- NUDGE ---\nTo: {to}\n{body}\n")
+
 
 def main(segment: str):
     customers = fetch_customers(segment)
@@ -40,9 +44,9 @@ def main(segment: str):
         message = out.value.strip()
         send_nudge(cust["email"], message)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--segment", required=True)
     args = parser.parse_args()
     main(args.segment)
-

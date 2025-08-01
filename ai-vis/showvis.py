@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="CDP Segmentation Demo", layout="wide")
 
+
 @st.cache_data
 def load_data(path):
     # Load key sheets from the Excel file
@@ -18,6 +19,7 @@ def load_data(path):
     )
     return df
 
+
 def assign_segment(row, high_ltv, high_logins):
     if row['totalCustomerLifetimeValue'] >= high_ltv and row['numOfLogins30d'] >= high_logins:
         return 'High-Value & Engaged'
@@ -26,9 +28,11 @@ def assign_segment(row, high_ltv, high_logins):
     else:
         return 'Mid-Tier'
 
+
 def main():
     st.title("CDP Customer Segmentation Demo")
-    st.markdown("Visualize segments based on Lifetime Value vs. Recent Engagement")
+    st.markdown(
+        "Visualize segments based on Lifetime Value vs. Recent Engagement")
 
     # File uploader
     uploaded = st.file_uploader("Upload your Excel file", type=['xlsx'])
@@ -51,7 +55,8 @@ def main():
         )
 
         # Assign segments
-        df['segment'] = df.apply(assign_segment, axis=1, args=(high_ltv, high_logins))
+        df['segment'] = df.apply(
+            assign_segment, axis=1, args=(high_ltv, high_logins))
 
         # Show data and metrics
         st.subheader("Segment Distribution")
@@ -75,6 +80,6 @@ def main():
         st.subheader("Sample Records")
         st.dataframe(df.head(10))
 
+
 if __name__ == "__main__":
     main()
-

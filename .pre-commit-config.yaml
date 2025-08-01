@@ -1,0 +1,37 @@
+repos:
+  # Python: Black auto-formatter
+  - repo: https://github.com/psf/black
+    rev: 24.3.0
+    hooks:
+      - id: black
+        language_version: python3
+
+  # Python: Flake8 linter
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+
+  # Python: Type checker
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+
+  # Java: Checkstyle
+  - repo: local
+    hooks:
+      - id: checkstyle
+        name: checkstyle
+        entry: bash -c 'mvn checkstyle:check'
+        language: system
+        types: [java]
+
+  # Java: SpotBugs
+  - repo: local
+    hooks:
+      - id: spotbugs
+        name: spotbugs
+        entry: bash -c 'mvn com.github.spotbugs:spotbugs-maven-plugin:spotbugs'
+        language: system
+        types: [java]

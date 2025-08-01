@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 
+
 class Customer(Base):
     __tablename__ = 'customers'
 
@@ -17,8 +18,8 @@ class Customer(Base):
     missed_notifications = Column(Integer)
     email_engagement_score = Column(Float)
 
+
 # Setup connection
 engine = create_engine("sqlite:///customers.db")
 SessionLocal = sessionmaker(bind=engine)
 Base.metadata.create_all(bind=engine)
-

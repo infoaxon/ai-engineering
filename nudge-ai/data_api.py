@@ -2,7 +2,9 @@ from fastapi import FastAPI, HTTPException
 import pandas as pd
 
 app = FastAPI()
-df = pd.read_csv("cdp_master_synthetic.csv")  # ensure some of the sample data exists
+# ensure some of the sample data exists
+df = pd.read_csv("cdp_master_synthetic.csv")
+
 
 @app.get("/customers/to_nudge")
 def to_nudge(segment: str):
@@ -13,4 +15,3 @@ def to_nudge(segment: str):
 
 # Run with:
 #   uvicorn data_api:app --reload
-

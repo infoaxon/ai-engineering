@@ -5,7 +5,7 @@ import argparse
 from datetime import datetime
 from dateutil import parser as dtparser
 
-from langchain_ollama import OllamaLLM 
+from langchain_ollama import OllamaLLM
 from langchain_core.prompts import PromptTemplate
 
 # 1) Define the prompt template
@@ -36,6 +36,7 @@ llm = OllamaLLM(
     temperature=0.7,
 )
 
+
 def fetch_customers(segment: str):
     resp = requests.get(
         f"http://localhost:8000/customers/to_nudge?segment={segment}"
@@ -43,8 +44,10 @@ def fetch_customers(segment: str):
     resp.raise_for_status()
     return resp.json()
 
+
 def send_nudge(to: str, body: str):
     print(f"\n--- NUDGE ---\nTo: {to}\n{body}\n")
+
 
 def generate_nudge(cust: dict) -> str:
     # compute days since last policy ended
@@ -64,15 +67,16 @@ def generate_nudge(cust: dict) -> str:
     result = llm.generate([text])
     return result.generations[0][0].text.strip()
 
+
 def main(segment: str):
     customers = fetch_customers(segment)
     for cust in customers:
         message = generate_nudge(cust)
         send_nudge(cust["email"], message)
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--segment", required=True, help="Segment to nudge")
     args = parser.parse_args()
     main(args.segment)
-

@@ -16,6 +16,8 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
 # Query Ollama
+
+
 def query_ollama(prompt, model="llama3.2"):
     try:
         res = requests.post("http://localhost:11434/api/generate", json={
@@ -29,9 +31,11 @@ def query_ollama(prompt, model="llama3.2"):
     except Exception as e:
         return f"[Error contacting Ollama API: {e}]"
 
+
 # Chat input
 with st.form("chat_form"):
-    query = st.text_input("Ask a question about your insurance documents:", key="user_input")
+    query = st.text_input(
+        "Ask a question about your insurance documents:", key="user_input")
     submitted = st.form_submit_button("Send")
 
 if submitted and query:
@@ -64,4 +68,5 @@ for user_msg, response, sources in reversed(st.session_state.chat_history):
         st.markdown(response)
         with st.expander("📄 Source Context"):
             for doc in sources:
-                st.markdown(f"**{doc.metadata.get('source', 'Unknown')}**\n\n{doc.page_content[:500]}...")
+                st.markdown(
+                    f"**{doc.metadata.get('source', 'Unknown')}**\n\n{doc.page_content[:500]}...")

@@ -7,4 +7,3 @@ if not texts or not sample_embedding:
 
 # Create vector store
 db = Chroma.from_documents(chunks, embedding, persist_directory="./chroma_db")
-

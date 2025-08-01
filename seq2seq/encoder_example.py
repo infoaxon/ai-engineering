@@ -6,6 +6,7 @@ vocab_size = 10000
 embedding_dim = 300
 hidden_dim = 512
 
+
 class Encoder(nn.Module):
     def __init__(self):
         super(Encoder, self).__init__()
@@ -25,10 +26,10 @@ class Encoder(nn.Module):
 
 
 # Assume we have the input: "I am happy today" → token IDs
-sentence_ids = torch.tensor([[23, 45, 67, 89]]).T  # shape: [4, 1] (seq_len, batch_size)
+# shape: [4, 1] (seq_len, batch_size)
+sentence_ids = torch.tensor([[23, 45, 67, 89]]).T
 
 encoder = Encoder()
 hidden, cell = encoder(sentence_ids)
 
 print(hidden.shape)  # [1, 1, 512]
-

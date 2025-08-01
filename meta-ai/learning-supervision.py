@@ -10,4 +10,3 @@ results = unmasker("The capital of France is [MASK].")
 # Pretty-print results in DataFrame
 df_results = pd.DataFrame(results)
 print(df_results[['sequence', 'score', 'token_str']])
-

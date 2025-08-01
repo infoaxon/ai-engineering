@@ -9,6 +9,8 @@ import numpy as np
 # ----------------------------
 # 1. Vocabulary Preparation
 # ----------------------------
+
+
 def build_vocab(sentences):
     vocab = {"<pad>": 0, "<sos>": 1, "<eos>": 2, "<unk>": 3}
     idx = 4
@@ -19,6 +21,7 @@ def build_vocab(sentences):
                 idx += 1
     return vocab
 
+
 def sentence_to_tensor(sentence, vocab):
     tokens = sentence.split()
     ids = [vocab.get(tok, vocab["<unk>"]) for tok in tokens]
@@ -27,6 +30,8 @@ def sentence_to_tensor(sentence, vocab):
 # ----------------------------
 # 2. Model Definitions
 # ----------------------------
+
+
 class Attention(nn.Module):
     def __init__(self, hidden_dim):
         super().__init__()
@@ -36,9 +41,11 @@ class Attention(nn.Module):
     def forward(self, hidden, encoder_outputs):
         src_len = encoder_outputs.shape[0]
         hidden = hidden.repeat(src_len, 1, 1)
-        energy = torch.tanh(self.attn(torch.cat((hidden, encoder_outputs), dim=2)))
+        energy = torch.tanh(
+            self.attn(torch.cat((hidden, encoder_outputs), dim=2)))
         attention = self.v(energy).squeeze(2)
         return torch.softmax(attention, dim=0)
+
 
 class Encoder(nn.Module):
     def __init__(self, vocab_size, emb_dim, hidden_dim):
@@ -51,6 +58,7 @@ class Encoder(nn.Module):
         outputs, (hidden, cell) = self.lstm(embedded)
         return outputs, hidden, cell
 
+
 class AttnDecoder(nn.Module):
     def __init__(self, vocab_size, emb_dim, hidden_dim, attention):
         super().__init__()
@@ -61,7 +69,8 @@ class AttnDecoder(nn.Module):
 
     def forward(self, input_token, hidden, cell, encoder_outputs):
         embedded = self.embedding(input_token).unsqueeze(0)
-        attn_weights = self.attention(hidden, encoder_outputs).unsqueeze(1).permute(1, 2, 0)
+        attn_weights = self.attention(
+            hidden, encoder_outputs).unsqueeze(1).permute(1, 2, 0)
         encoder_outputs = encoder_outputs.permute(1, 0, 2)
         context = torch.bmm(attn_weights, encoder_outputs).permute(1, 0, 2)
         rnn_input = torch.cat((embedded, context), dim=2)
@@ -72,6 +81,8 @@ class AttnDecoder(nn.Module):
 # ----------------------------
 # 3. Training Function
 # ----------------------------
+
+
 def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, decoder_optimizer, criterion):
     encoder_optimizer.zero_grad()
     decoder_optimizer.zero_grad()
@@ -82,7 +93,8 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
 
     decoder_input = target_tensor[0]  # <sos>
     for t in range(1, target_len):
-        output, hidden, cell = decoder(decoder_input, hidden, cell, encoder_outputs)
+        output, hidden, cell = decoder(
+            decoder_input, hidden, cell, encoder_outputs)
         loss += criterion(output, target_tensor[t])
         decoder_input = target_tensor[t]  # teacher forcing
 
@@ -90,6 +102,7 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
     encoder_optimizer.step()
     decoder_optimizer.step()
     return loss.item() / (target_len - 1)
+
 
 # ----------------------------
 # 4. Prepare Data
@@ -130,7 +143,8 @@ for epoch in range(epochs):
     for src, tgt in pairs:
         src_tensor = sentence_to_tensor(src, src_vocab)
         tgt_tensor = sentence_to_tensor(tgt, tgt_vocab)
-        loss = train(src_tensor, tgt_tensor, encoder, decoder, encoder_opt, decoder_opt, criterion)
+        loss = train(src_tensor, tgt_tensor, encoder, decoder,
+                     encoder_opt, decoder_opt, criterion)
         total_loss += loss
     avg_loss = total_loss / len(pairs)
     losses.append(avg_loss)
@@ -142,6 +156,7 @@ for epoch in range(epochs):
 inv_src_vocab = {v: k for k, v in src_vocab.items()}
 inv_tgt_vocab = {v: k for k, v in tgt_vocab.items()}
 
+
 def predict_with_attention(input_sentence, encoder, decoder, src_vocab, tgt_vocab, inv_tgt_vocab, max_len=10):
     input_tensor = sentence_to_tensor(input_sentence, src_vocab)
     encoder_outputs, hidden, cell = encoder(input_tensor)
@@ -151,12 +166,14 @@ def predict_with_attention(input_sentence, encoder, decoder, src_vocab, tgt_voca
     attentions = []
 
     for _ in range(max_len):
-        output, hidden, cell = decoder(decoder_input, hidden, cell, encoder_outputs)
+        output, hidden, cell = decoder(
+            decoder_input, hidden, cell, encoder_outputs)
         prob = F.softmax(output, dim=1)
         pred_token = prob.argmax(1).item()
         decoded_tokens.append(pred_token)
 
-        attn_weights = decoder.attention(hidden, encoder_outputs).squeeze(1).detach().numpy()
+        attn_weights = decoder.attention(
+            hidden, encoder_outputs).squeeze(1).detach().numpy()
         attentions.append(attn_weights)
 
         if pred_token == tgt_vocab["<eos>"]:
@@ -167,22 +184,27 @@ def predict_with_attention(input_sentence, encoder, decoder, src_vocab, tgt_voca
     decoded_words = [inv_tgt_vocab.get(tok, "<unk>") for tok in decoded_tokens]
     return decoded_words, np.array(attentions), input_tensor
 
+
 def plot_attention(attn_weights, input_tensor, input_vocab, output_tokens):
-    input_words = [inv_src_vocab.get(tok.item(), "<unk>") for tok in input_tensor.squeeze()]
+    input_words = [inv_src_vocab.get(tok.item(), "<unk>")
+                   for tok in input_tensor.squeeze()]
     input_words = input_words[1:-1]  # strip <sos>, <eos>
     output_words = output_tokens
 
     fig, ax = plt.subplots(figsize=(8, 6))
-    sns.heatmap(attn_weights, xticklabels=input_words, yticklabels=output_words, cmap="viridis", annot=True, fmt=".2f")
+    sns.heatmap(attn_weights, xticklabels=input_words,
+                yticklabels=output_words, cmap="viridis", annot=True, fmt=".2f")
     ax.set_xlabel("Input Sequence")
     ax.set_ylabel("Output Sequence")
     plt.title("Attention Weights")
     plt.tight_layout()
     plt.show()
 
+
 #  Example sentence to visualize
 input_text = "i am happy"
-output_words, attn_matrix, input_tensor = predict_with_attention(input_text, encoder, decoder, src_vocab, tgt_vocab, inv_tgt_vocab)
+output_words, attn_matrix, input_tensor = predict_with_attention(
+    input_text, encoder, decoder, src_vocab, tgt_vocab, inv_tgt_vocab)
 plot_attention(attn_matrix, input_tensor, src_vocab, output_words)
 
 
@@ -196,4 +218,3 @@ plt.ylabel("Loss")
 plt.grid(True)
 plt.tight_layout()
 plt.show()
-

@@ -20,6 +20,8 @@ data = {
 df = pd.DataFrame(data)
 
 # --- Rule-based recommendation engine ---
+
+
 def get_recommendations(customer):
     recs = []
 
@@ -60,6 +62,8 @@ def get_recommendations(customer):
     return recs
 
 # --- LLM Integration with Ollama ---
+
+
 def query_llama(customer_profile):
     prompt = f"""
     You are an insurance assistant. Based on the following customer profile, suggest the most relevant next best actions or offers:
@@ -79,6 +83,7 @@ def query_llama(customer_profile):
             return f"Error from Ollama: {response.status_code}"
     except Exception as e:
         return f"Error connecting to Ollama: {e}"
+
 
 # --- Streamlit App ---
 st.title("🧠 Insurance Next Best Action Demo")
@@ -108,4 +113,3 @@ if st.button("Ask LLaMA 3.2 (Ollama)"):
     with st.spinner("Thinking..."):
         llama_response = query_llama(selected_customer.to_dict())
         st.markdown(f"**LLM Suggestion:**\n\n{llama_response}")
-

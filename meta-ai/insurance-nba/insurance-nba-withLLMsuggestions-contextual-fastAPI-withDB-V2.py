@@ -14,6 +14,7 @@ from sqlalchemy.orm import sessionmaker
 # --- SQLAlchemy setup for SQLite DB ---
 Base = declarative_base()
 
+
 class Customer(Base):
     __tablename__ = 'customers'
     customer_id = Column(Integer, primary_key=True)
@@ -25,6 +26,7 @@ class Customer(Base):
     policy_expiring_in_days = Column(Integer)
     missed_notifications = Column(Integer)
     email_engagement_score = Column(Float)
+
 
 engine = create_engine("sqlite:///customers.db")
 SessionLocal = sessionmaker(bind=engine)
@@ -52,13 +54,18 @@ if session.query(Customer).count() == 0:
 session.close()
 
 # --- Helper functions ---
+
+
 def get_customer_by_id(customer_id: int):
     session = SessionLocal()
-    customer = session.query(Customer).filter(Customer.customer_id == customer_id).first()
+    customer = session.query(Customer).filter(
+        Customer.customer_id == customer_id).first()
     session.close()
     return customer
 
 # --- Recommendation Engines ---
+
+
 def get_recommendations_from_dict(customer: dict):
     recs = []
 
@@ -94,6 +101,7 @@ def get_recommendations_from_dict(customer: dict):
 
     return recs
 
+
 def get_recommendations_from_model(customer: Customer):
     return get_recommendations_from_dict({
         "customer_id": customer.customer_id,
@@ -108,6 +116,8 @@ def get_recommendations_from_model(customer: Customer):
     })
 
 # --- LLM Integration with Ollama ---
+
+
 def query_llama(customer_profile):
     prompt = f"""
     You are an insurance assistant. Based on the following customer profile, suggest the most relevant next best actions or offers:
@@ -128,8 +138,10 @@ def query_llama(customer_profile):
     except Exception as e:
         return f"Error connecting to Ollama: {e}"
 
+
 # --- FastAPI Setup ---
 app = FastAPI()
+
 
 class CustomerProfile(BaseModel):
     customer_id: int
@@ -142,13 +154,16 @@ class CustomerProfile(BaseModel):
     missed_notifications: int
     email_engagement_score: float
 
+
 @app.post("/recommendations/rules")
 async def rules_recommendation(profile: CustomerProfile):
     return {"recommendations": get_recommendations_from_dict(profile.model_dump())}
 
+
 @app.post("/recommendations/llm")
 async def llm_recommendation(profile: CustomerProfile):
     return {"llm_suggestions": query_llama(profile.model_dump())}
+
 
 @app.get("/customer/{customer_id}")
 async def get_customer(customer_id: int):
@@ -158,7 +173,8 @@ async def get_customer(customer_id: int):
     return {"error": "Customer not found"}
 
 # Run FastAPI in background
-threading.Thread(target=lambda: uvicorn.run(app, host="0.0.0.0", port=8000, log_level="error"), daemon=True).start()
+threading.Thread(target=lambda: uvicorn.run(
+    app, host="0.0.0.0", port=8000, log_level="error"), daemon=True).start()
 
 # --- Streamlit App ---
 st.title("🧠 Insurance Next Best Action Demo")
@@ -207,4 +223,3 @@ if st.button("Ask LLaMA 3.2 (Ollama)"):
             "email_engagement_score": selected_customer.email_engagement_score
         })
         st.markdown(f"**LLM Suggestion:**\n\n{llama_response}")
-
