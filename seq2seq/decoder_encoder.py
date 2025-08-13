@@ -9,7 +9,7 @@ corpus = [
     "i am happy today",
     "you are going to the market",
     "we will learn ai",
-    "this is an encoder demo"
+    "this is an encoder demo",
 ]
 
 
@@ -44,6 +44,7 @@ class Encoder(nn.Module):
         outputs, (hidden, cell) = self.lstm(embedded)
         return outputs, hidden, cell
 
+
 # ----------------------------
 # Decoder Definition
 # ----------------------------
@@ -63,6 +64,7 @@ class Decoder(nn.Module):
         prediction = self.fc(output.squeeze(0))  # [batch_size, vocab_size]
         return prediction, hidden, cell
 
+
 # ----------------------------
 # Helper Function: Encode + Decode
 # ----------------------------
@@ -71,8 +73,7 @@ class Decoder(nn.Module):
 def run_seq2seq_demo(input_sentence, max_len=10):
     tokens = input_sentence.lower().split()
     token_ids = [vocab.get(tok, vocab["<unk>"]) for tok in tokens]
-    input_tensor = torch.tensor(token_ids).unsqueeze(
-        1)  # [seq_len, batch_size]
+    input_tensor = torch.tensor(token_ids).unsqueeze(1)  # [seq_len, batch_size]
 
     # Encode
     _, hidden, cell = encoder(input_tensor)

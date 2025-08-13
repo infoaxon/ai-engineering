@@ -11,7 +11,7 @@ corpus = [
     "i am happy today",
     "you are going to the market",
     "we will learn ai",
-    "this is an encoder demo"
+    "this is an encoder demo",
 ]
 
 # Build vocabulary
@@ -62,8 +62,7 @@ sentence = st.text_input("Enter a sentence", "i am happy today")
 if sentence:
     tokens = sentence.lower().split()
     token_ids = [vocab.get(tok, vocab["<unk>"]) for tok in tokens]
-    input_tensor = torch.tensor(token_ids).unsqueeze(
-        1)  # [seq_len, batch_size]
+    input_tensor = torch.tensor(token_ids).unsqueeze(1)  # [seq_len, batch_size]
 
     embedded, outputs, hidden, cell = encoder(input_tensor)
 
@@ -75,14 +74,15 @@ if sentence:
     embed_table = pd.DataFrame(
         embedded.squeeze(1).detach().numpy(),
         index=tokens,
-        columns=[f"dim_{i+1}" for i in range(embedding_dim)]
+        columns=[f"dim_{i+1}" for i in range(embedding_dim)],
     )
     st.dataframe(embed_table.style.set_precision(4), height=300)
 
     st.markdown("### 🧠 Final Hidden State (Summary Vector)")
     hidden_vector = hidden.squeeze(0).detach().numpy()
-    hidden_df = pd.DataFrame(hidden_vector.reshape(
-        1, -1), columns=[f"h{i+1}" for i in range(hidden_dim)])
+    hidden_df = pd.DataFrame(
+        hidden_vector.reshape(1, -1), columns=[f"h{i+1}" for i in range(hidden_dim)]
+    )
     st.dataframe(hidden_df.style.set_precision(4))
 
     st.success("Encoding complete! Try a different sentence.")

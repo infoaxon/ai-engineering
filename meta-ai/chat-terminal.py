@@ -10,11 +10,7 @@ db = Chroma(persist_directory="./chroma_db", embedding_function=embedding)
 def query_ollama(prompt, model="llama3.2"):
     response = requests.post(
         "http://localhost:11434/api/generate",
-        json={
-            "model": model,
-            "prompt": prompt,
-            "stream": False
-        }
+        json={"model": model, "prompt": prompt, "stream": False},
     )
     return response.json()["response"]
 

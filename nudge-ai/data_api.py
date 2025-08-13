@@ -13,5 +13,6 @@ def to_nudge(segment: str):
         raise HTTPException(404, f"No customers in segment {segment}")
     return subset.to_dict(orient="records")
 
+
 # Run with:
 #   uvicorn data_api:app --reload

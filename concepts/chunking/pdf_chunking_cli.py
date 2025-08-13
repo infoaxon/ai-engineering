@@ -11,10 +11,11 @@ def sliding_window_chunking(text: str, chunk_size: int, overlap: int):
     chunks = []
     i = 0
     while i < len(words):
-        chunk = words[i:i+chunk_size]
+        chunk = words[i : i + chunk_size]
         chunks.append(" ".join(chunk))
         i += chunk_size - overlap
     return chunks
+
 
 # --- PDF Text Extraction ---
 
@@ -26,6 +27,7 @@ def extract_text_from_pdf(file_path):
         text += page.extract_text() + "\n"
     return text
 
+
 # --- ASCII Visualization ---
 
 
@@ -36,6 +38,7 @@ def ascii_visualization(total_words, chunk_size, overlap):
     while pos < total_words:
         print(" " * (pos // 2) + "[" + "=" * (chunk_size // 2) + f"] ({pos})")
         pos += step
+
 
 # --- Main CLI ---
 
@@ -69,9 +72,8 @@ def main():
         # ASCII visualization
         ascii_visualization(total_words, chunk_size, overlap)
 
-        choice = input(
-            "\nDo you want to try different values? (y/n): ").lower()
-        if choice != 'y':
+        choice = input("\nDo you want to try different values? (y/n): ").lower()
+        if choice != "y":
             break
 
 

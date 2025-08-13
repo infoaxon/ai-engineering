@@ -15,7 +15,7 @@ prompt = PromptTemplate(
         "age",
         "daysSinceLastPolicy",
         "numOfLogins30d",
-        "propensityScore"
+        "propensityScore",
     ],
     template="""\
 You are writing a one-sentence reactivation nudge for an insurance customer.
@@ -28,7 +28,7 @@ You are writing a one-sentence reactivation nudge for an insurance customer.
 Craft a friendly, personalized message that includes at least two of those dynamic values.
 Here's an example of inserting values: "It's been {daysSinceLastPolicy} days…".
 
-Your nudge:"""
+Your nudge:""",
 )
 
 # 2) Initialize your LLM
@@ -36,8 +36,7 @@ llm = OpenAI(temperature=0.7)
 
 
 def fetch_customers(segment: str):
-    resp = requests.get(
-        f"http://localhost:8000/customers/to_nudge?segment={segment}")
+    resp = requests.get(f"http://localhost:8000/customers/to_nudge?segment={segment}")
     resp.raise_for_status()
     return resp.json()
 
@@ -56,7 +55,7 @@ def generate_nudge(cust: dict) -> str:
         age=cust["age"],
         daysSinceLastPolicy=days_since,
         numOfLogins30d=cust["numOfLogins30d"],
-        propensityScore=cust["propensityScore"]
+        propensityScore=cust["propensityScore"],
     )
 
     # Call the LLM directly

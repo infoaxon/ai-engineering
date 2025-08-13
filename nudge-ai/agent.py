@@ -14,7 +14,7 @@ prompt = PromptTemplate(
         "Customer name: {name}\n"
         "Propensity to buy (0-1): {propensityScore}\n"
         "Your message:"
-    )
+    ),
 )
 
 # Initialize LLM and compose with the prompt
@@ -23,8 +23,7 @@ runnable = RunnableSequence(prompt, llm)
 
 
 def fetch_customers(segment: str):
-    resp = requests.get(
-        f"http://localhost:8000/customers/to_nudge?segment={segment}")
+    resp = requests.get(f"http://localhost:8000/customers/to_nudge?segment={segment}")
     resp.raise_for_status()
     return resp.json()
 
@@ -37,10 +36,12 @@ def main(segment: str):
     customers = fetch_customers(segment)
     for cust in customers:
         # Invoke the composed prompt+LLM
-        out = runnable.invoke({
-            "name": cust["name"],
-            "propensityScore": cust["propensityScore"],
-        })
+        out = runnable.invoke(
+            {
+                "name": cust["name"],
+                "propensityScore": cust["propensityScore"],
+            }
+        )
         message = out.value.strip()
         send_nudge(cust["email"], message)
 

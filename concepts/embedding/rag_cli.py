@@ -25,7 +25,7 @@ def sliding_window_chunking(text: str, chunk_size: int, overlap: int):
     chunks = []
     i = 0
     while i < len(words):
-        chunk = words[i: i + chunk_size]
+        chunk = words[i : i + chunk_size]
         chunks.append(" ".join(chunk))
         i += chunk_size - overlap
     return chunks

@@ -83,14 +83,12 @@ def interactive_search(bm25, embeddings, model, chunks):
             print(f"[BM25] {score:.2f} - {text[:80]}…")
 
         print("\n-- Dense Results --")
-        dense_results, dense_scores = dense_retrieve(
-            embeddings, chunks, model, query)
+        dense_results, dense_scores = dense_retrieve(embeddings, chunks, model, query)
         for text, score in dense_results:
             print(f"[Dense] {score:.4f} - {text[:80]}…")
 
         print("\n-- Hybrid Results (α=0.5) --")
-        hybrid_results = hybrid_retrieve(
-            bm25_scores, dense_scores, chunks, alpha=0.5)
+        hybrid_results = hybrid_retrieve(bm25_scores, dense_scores, chunks, alpha=0.5)
         for text, score in hybrid_results:
             print(f"[Hybrid] {score:.4f} - {text[:80]}…")
 

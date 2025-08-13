@@ -8,7 +8,7 @@ corpus = [
     "i am happy today",
     "you are going to the market",
     "we will learn ai",
-    "this is an encoder demo"
+    "this is an encoder demo",
 ]
 
 
@@ -56,9 +56,9 @@ encoder = Encoder(len(vocab), embedding_dim, hidden_dim)
 def encode_sentence(sentence):
     tokens = sentence.lower().split()
     token_ids = [vocab.get(tok, vocab["<unk>"]) for tok in tokens]
-    tensor = torch.tensor(token_ids).unsqueeze(
-        1)  # shape: [seq_len, batch_size]
+    tensor = torch.tensor(token_ids).unsqueeze(1)  # shape: [seq_len, batch_size]
     return tokens, token_ids, tensor
+
 
 # ----------------------------
 # Step 4: Demo Run

@@ -5,11 +5,9 @@ import requests
 
 
 def get_model_info(model="llama3"):
-    res = requests.post(
-        "http://localhost:11434/api/show",
-        json={"name": model}
-    )
+    res = requests.post("http://localhost:11434/api/show", json={"name": model})
     return res.json()
+
 
 # And now I am printing what the API returns above, I will print it in YAML
 

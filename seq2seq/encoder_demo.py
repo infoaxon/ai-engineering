@@ -5,7 +5,7 @@ from torchtext.vocab import build_vocab_from_iterator
 from torchtext.data.utils import get_tokenizer
 
 # Step 1: Tokenizer and Vocabulary
-tokenizer = get_tokenizer('basic_english')
+tokenizer = get_tokenizer("basic_english")
 
 
 def yield_tokens(sentences):
@@ -18,11 +18,10 @@ corpus = [
     "I am happy today",
     "You are going to the market",
     "We will learn AI",
-    "This is an encoder demo"
+    "This is an encoder demo",
 ]
 
-vocab = build_vocab_from_iterator(
-    yield_tokens(corpus), specials=["<pad>", "<unk>"])
+vocab = build_vocab_from_iterator(yield_tokens(corpus), specials=["<pad>", "<unk>"])
 vocab.set_default_index(vocab["<unk>"])
 
 # Step 2: Encoder Class
@@ -53,9 +52,9 @@ encoder = Encoder(vocab_size, embedding_dim, hidden_dim)
 def encode_sentence(sentence):
     tokens = tokenizer(sentence)
     token_ids = vocab(tokens)
-    tensor = torch.tensor(token_ids).unsqueeze(
-        1)  # shape: [seq_len, batch_size]
+    tensor = torch.tensor(token_ids).unsqueeze(1)  # shape: [seq_len, batch_size]
     return tensor, tokens
+
 
 # Step 4: Run a Demo
 

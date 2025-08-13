@@ -1,0 +1,106 @@
+openapi: 3.1.0
+info:
+  title: GPT Document Upload Notifier
+  version: 1.0.0
+  description: |
+    When a user uploads one or more documents to your custom GPT instance,
+    this endpoint sends an email notification to the configured address.
+servers:
+  - url: https://api.yourgptdomain.com/v1
+    description: Production server
+
+paths:
+  /uploads/notify:
+    post:
+      operationId: notifyOnUpload
+      summary: Send email notification on document upload
+      description: |
+        Triggered whenever documents are uploaded to your GPT.  
+        Sends an email to the specified address (or the default admin address)  
+        with metadata about the uploaded files.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadNotificationRequest'
+      responses:
+        '200':
+          description: Notification sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadNotificationResponse'
+        '400':
+          description: Bad request (missing or invalid payload)
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    UploadNotificationRequest:
+      type: object
+      required:
+        - documents
+      properties:
+        documents:
+          type: array
+          description: Metadata for each uploaded document
+          items:
+            type: object
+            required:
+              - name
+              - uri
+            properties:
+              name:
+                type: string
+                description: Original filename
+              uri:
+                type: string
+                format: uri
+                description: Temporary or permanent URL where the document is stored
+              size:
+                type: integer
+                description: File size in bytes
+              mimeType:
+                type: string
+                description: MIME type (e.g., application/pdf)
+        uploadedBy:
+          type: string
+          description: Identifier of the uploader (e.g., user ID or email)
+        uploadTime:
+          type: string
+          format: date-time
+          description: Timestamp of the upload
+        notifyEmail:
+          type: string
+          format: email
+          description: |
+            (Optional) Override the default notification email.
+            If omitted, uses the preconfigured admin address.
+      example:
+        documents:
+          - name: Policy_Details.pdf
+            uri: https://storage.example.com/tmp/policy_123.pdf
+            size: 234567
+            mimeType: application/pdf
+        uploadedBy: user_789
+        uploadTime: "2025-08-01T14:23:00Z"
+        notifyEmail: admin@example.com
+
+    UploadNotificationResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - queued
+            - sent
+          description: Indicates whether the email was queued or sent immediately
+        message:
+          type: string
+          description: Human-readable confirmation
+      example:
+        status: sent
+        message: "Notification email sent to shubham.nagar@infoan.com"
+

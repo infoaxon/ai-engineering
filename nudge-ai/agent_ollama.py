@@ -15,7 +15,7 @@ prompt = PromptTemplate(
         "age",
         "daysSinceLastPolicy",
         "numOfLogins30d",
-        "propensityScore"
+        "propensityScore",
     ],
     template="""\
 You are writing a one-sentence reactivation nudge for an insurance customer.
@@ -26,21 +26,19 @@ You are writing a one-sentence reactivation nudge for an insurance customer.
 - Propensity score (0-1): {propensityScore}
 
 Craft a friendly, personalized message that includes at least two of those dynamic values.
-Your nudge:"""
+Your nudge:""",
 )
 
 # 2) Swap in the Ollama LLM wrapper
 llm = OllamaLLM(
-    model="llama3.2:latest",               # exactly the name from `ollama ls`
+    model="llama3.2:latest",  # exactly the name from `ollama ls`
     base_url="http://127.0.0.1:11434",
     temperature=0.7,
 )
 
 
 def fetch_customers(segment: str):
-    resp = requests.get(
-        f"http://localhost:8000/customers/to_nudge?segment={segment}"
-    )
+    resp = requests.get(f"http://localhost:8000/customers/to_nudge?segment={segment}")
     resp.raise_for_status()
     return resp.json()
 
@@ -60,7 +58,7 @@ def generate_nudge(cust: dict) -> str:
         age=cust["age"],
         daysSinceLastPolicy=days_since,
         numOfLogins30d=cust["numOfLogins30d"],
-        propensityScore=cust["propensityScore"]
+        propensityScore=cust["propensityScore"],
     )
 
     # call your local Llama 3.2 via Ollama

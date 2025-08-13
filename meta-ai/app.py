@@ -20,11 +20,10 @@ if "chat_history" not in st.session_state:
 
 def query_ollama(prompt, model="llama3.2"):
     try:
-        res = requests.post("http://localhost:11434/api/generate", json={
-            "model": model,
-            "prompt": prompt,
-            "stream": False
-        })
+        res = requests.post(
+            "http://localhost:11434/api/generate",
+            json={"model": model, "prompt": prompt, "stream": False},
+        )
         res.raise_for_status()
         data = res.json()
         return data.get("response", "[Error: Unexpected response format]")
@@ -35,7 +34,8 @@ def query_ollama(prompt, model="llama3.2"):
 # Chat input
 with st.form("chat_form"):
     query = st.text_input(
-        "Ask a question about your insurance documents:", key="user_input")
+        "Ask a question about your insurance documents:", key="user_input"
+    )
     submitted = st.form_submit_button("Send")
 
 if submitted and query:
@@ -69,4 +69,5 @@ for user_msg, response, sources in reversed(st.session_state.chat_history):
         with st.expander("📄 Source Context"):
             for doc in sources:
                 st.markdown(
-                    f"**{doc.metadata.get('source', 'Unknown')}**\n\n{doc.page_content[:500]}...")
+                    f"**{doc.metadata.get('source', 'Unknown')}**\n\n{doc.page_content[:500]}..."
+                )

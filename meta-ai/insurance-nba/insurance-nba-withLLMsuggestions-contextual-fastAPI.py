@@ -30,37 +30,48 @@ df = pd.DataFrame(data)
 def get_recommendations(customer):
     recs = []
 
-    if customer['policy_expiring_in_days'] <= 30:
-        recs.append({
-            "recommendation": "🔄 Renew your policy before it expires to avoid coverage gaps.",
-            "why": f"The policy is expiring in {customer['policy_expiring_in_days']} days."
-        })
+    if customer["policy_expiring_in_days"] <= 30:
+        recs.append(
+            {
+                "recommendation": "🔄 Renew your policy before it expires to avoid coverage gaps.",
+                "why": f"The policy is expiring in {customer['policy_expiring_in_days']} days.",
+            }
+        )
 
-    if customer['last_login_days_ago'] > 30 or customer['missed_notifications'] > 2:
-        recs.append({
-            "recommendation": "📬 You've missed some important updates. Catch up now!",
-            "why": f"Last login was {customer['last_login_days_ago']} days ago and missed {customer['missed_notifications']} notifications."
-        })
+    if customer["last_login_days_ago"] > 30 or customer["missed_notifications"] > 2:
+        recs.append(
+            {
+                "recommendation": "📬 You've missed some important updates. Catch up now!",
+                "why": f"Last login was {customer['last_login_days_ago']} days ago and missed {customer['missed_notifications']} notifications.",
+            }
+        )
 
-    if customer['email_engagement_score'] < 0.3:
-        recs.append({
-            "recommendation": "💡 Don't miss out! Check your email for exclusive offers.",
-            "why": f"Engagement score is low at {customer['email_engagement_score']}."
-        })
+    if customer["email_engagement_score"] < 0.3:
+        recs.append(
+            {
+                "recommendation": "💡 Don't miss out! Check your email for exclusive offers.",
+                "why": f"Engagement score is low at {customer['email_engagement_score']}.",
+            }
+        )
 
-    policies = customer['active_policies']
+    policies = customer["active_policies"]
     if "Motor" in policies and "Health" not in policies:
-        recs.append({
-            "recommendation": "❤️ Secure your health with our affordable health plans.",
-            "why": "Customer has Motor insurance but no Health plan."
-        })
+        recs.append(
+            {
+                "recommendation": "❤️ Secure your health with our affordable health plans.",
+                "why": "Customer has Motor insurance but no Health plan.",
+            }
+        )
     if "Health" in policies and "Life" not in policies:
-        recs.append({
-            "recommendation": "🌟 Protect your family's future with a life insurance plan.",
-            "why": "Customer has Health plan but no Life insurance."
-        })
+        recs.append(
+            {
+                "recommendation": "🌟 Protect your family's future with a life insurance plan.",
+                "why": "Customer has Health plan but no Life insurance.",
+            }
+        )
 
     return recs
+
 
 # --- LLM Integration with Ollama ---
 
@@ -76,7 +87,7 @@ def query_llama(customer_profile):
     try:
         response = requests.post(
             "http://localhost:11434/api/generate",
-            json={"model": "llama3.2", "prompt": prompt, "stream": False}
+            json={"model": "llama3.2", "prompt": prompt, "stream": False},
         )
         if response.status_code == 200:
             return response.json().get("response", "No response from LLM")
@@ -111,16 +122,19 @@ async def rules_recommendation(profile: CustomerProfile):
 async def llm_recommendation(profile: CustomerProfile):
     return {"llm_suggestions": query_llama(profile.model_dump())}
 
+
 # Run FastAPI in background
-threading.Thread(target=lambda: uvicorn.run(
-    app, host="0.0.0.0", port=8000, log_level="error"), daemon=True).start()
+threading.Thread(
+    target=lambda: uvicorn.run(app, host="0.0.0.0", port=8000, log_level="error"),
+    daemon=True,
+).start()
 
 # --- Streamlit App ---
 st.title("🧠 Insurance Next Best Action Demo")
 st.write("Select a customer to see personalized recommendations:")
 
-customer_name = st.selectbox("Choose a customer:", df['name'])
-selected_customer = df[df['name'] == customer_name].iloc[0]
+customer_name = st.selectbox("Choose a customer:", df["name"])
+selected_customer = df[df["name"] == customer_name].iloc[0]
 
 st.subheader("📄 Customer Profile")
 st.json(selected_customer.to_dict())

@@ -25,7 +25,7 @@ def sliding_window_chunking(text: str, chunk_size: int, overlap: int):
     chunks = []
     i = 0
     while i < len(words):
-        chunk = words[i: i + chunk_size]
+        chunk = words[i : i + chunk_size]
         chunks.append(" ".join(chunk))
         i += chunk_size - overlap
     return chunks
@@ -33,8 +33,7 @@ def sliding_window_chunking(text: str, chunk_size: int, overlap: int):
 
 # --- 3. Deep Dive into Embeddings ---
 def display_embedding_insights(chunk_emb, chunks, num_examples=3):
-    print(
-        f"\n   → Embedding matrix shape: {chunk_emb.shape} (chunks × dims)\n")
+    print(f"\n   → Embedding matrix shape: {chunk_emb.shape} (chunks × dims)\n")
     for i in range(min(num_examples, len(chunks))):
         vec = chunk_emb[i]
         print(f"[Chunk {i+1} Preview:] {chunks[i][:80]}…")
