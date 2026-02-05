@@ -1,0 +1,348 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}{{ "New Customer" if is_new else "Edit " + customer.name }} - Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">
+            <i class="bi bi-{% if is_new %}plus-circle{% else %}pencil{% endif %}-fill me-2"></i>
+            {{ "New Customer" if is_new else "Edit Customer" }}
+        </h2>
+        <small class="text-muted">
+            {% if is_new %}
+            Add a new customer with their API endpoints
+            {% else %}
+            Update customer configuration for {{ customer.name }}
+            {% endif %}
+        </small>
+    </div>
+    <a href="/admin" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back to Admin
+    </a>
+</div>
+
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<form method="POST" enctype="multipart/form-data" id="customerForm">
+    <div class="row">
+        <!-- Left Column: Customer Details -->
+        <div class="col-md-4">
+            <div class="card card-admin shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Customer Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Customer Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name"
+                               value="{{ customer.name if customer else '' }}" required
+                               placeholder="e.g., Acme Corporation">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="customer_id" class="form-label">Customer ID</label>
+                        <input type="text" class="form-control" id="customer_id" name="customer_id"
+                               value="{{ customer.id if customer else '' }}"
+                               placeholder="Auto-generated from name"
+                               {% if not is_new %}readonly{% endif %}>
+                        <div class="form-text">Unique identifier. Leave blank to auto-generate from name.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"
+                                  placeholder="Optional description">{{ customer.description if customer else '' }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Environments</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="environments" value="dev" id="env_dev"
+                                   {% if not customer or 'dev' in customer.environments %}checked{% endif %}>
+                            <label class="form-check-label" for="env_dev">Development (dev)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="environments" value="sit" id="env_sit"
+                                   {% if not customer or 'sit' in customer.environments %}checked{% endif %}>
+                            <label class="form-check-label" for="env_sit">System Integration (sit)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="environments" value="uat" id="env_uat"
+                                   {% if not customer or 'uat' in customer.environments %}checked{% endif %}>
+                            <label class="form-check-label" for="env_uat">User Acceptance (uat)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="environments" value="production" id="env_prod"
+                                   {% if not customer or 'production' in customer.environments %}checked{% endif %}>
+                            <label class="form-check-label" for="env_prod">Production</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: API Configuration -->
+        <div class="col-md-8">
+            <div class="card card-admin shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-hdd-network me-2"></i>API Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="apiTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if is_new %}active{% endif %}" id="simple-tab" data-bs-toggle="tab"
+                                    data-bs-target="#simple" type="button" role="tab"
+                                    aria-controls="simple" aria-selected="{{ 'true' if is_new else 'false' }}"
+                                    onclick="document.getElementById('api_format').value='simple'">
+                                <i class="bi bi-list me-1"></i>Simple URL List
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if not is_new %}active{% endif %}" id="name-url-tab" data-bs-toggle="tab"
+                                    data-bs-target="#name-url" type="button" role="tab"
+                                    aria-controls="name-url" aria-selected="{{ 'false' if is_new else 'true' }}"
+                                    onclick="document.getElementById('api_format').value='name_url'">
+                                <i class="bi bi-list-columns me-1"></i>Name|URL Format
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="postman-tab" data-bs-toggle="tab"
+                                    data-bs-target="#postman" type="button" role="tab"
+                                    aria-controls="postman" aria-selected="false"
+                                    onclick="document.getElementById('api_format').value='postman'">
+                                <i class="bi bi-file-earmark-code me-1"></i>Postman Collection
+                            </button>
+                        </li>
+                    </ul>
+
+                    <input type="hidden" name="api_format" id="api_format" value="{{ 'name_url' if not is_new else 'simple' }}">
+
+                    <div class="tab-content" id="apiTabContent">
+                        <!-- Simple URL List Tab -->
+                        <div class="tab-pane fade {% if is_new %}show active{% endif %}" id="simple" role="tabpanel" aria-labelledby="simple-tab">
+                            <div class="mb-3">
+                                <label for="api_text_simple" class="form-label">API URLs</label>
+                                <textarea class="form-control font-monospace" id="api_text_simple" rows="12"
+                                          placeholder="Enter one URL per line. Name will be auto-generated from URL path.
+
+Example:
+https://api.example.com/health
+https://api.example.com/users/status
+https://api.example.com/orders/check"></textarea>
+                                <div class="form-text">
+                                    <strong>Defaults:</strong> POST method, ErrorMessages validation, 5000ms threshold
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Name|URL Format Tab -->
+                        <div class="tab-pane fade {% if not is_new %}show active{% endif %}" id="name-url" role="tabpanel" aria-labelledby="name-url-tab">
+                            <div class="mb-3">
+                                <label for="api_text_name_url" class="form-label">API Definitions</label>
+                                <textarea class="form-control font-monospace" id="api_text_name_url" rows="12"
+                                          placeholder="Enter one API per line in Name|URL format.
+
+Example:
+Health Check|https://api.example.com/health
+User Service|https://api.example.com/users/status
+Order Service|https://api.example.com/orders/check">{{ customer.api_text if customer else '' }}</textarea>
+                                <div class="form-text">
+                                    <strong>Format:</strong> <code>API Name|URL</code> (pipe separator)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Postman Collection Tab -->
+                        <div class="tab-pane fade" id="postman" role="tabpanel" aria-labelledby="postman-tab">
+                            <div class="mb-3">
+                                <label for="postman_file" class="form-label">Upload Postman Collection</label>
+                                <input class="form-control" type="file" id="postman_file" name="postman_file"
+                                       accept=".json,application/json">
+                                <div class="form-text">
+                                    Upload a Postman Collection JSON file (v2.1 format recommended)
+                                </div>
+                            </div>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Tip:</strong> Export your collection from Postman using
+                                <code>Export > Collection v2.1</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div class="card shadow-sm mb-4" id="previewCard" style="display: none;">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-eye me-2"></i>API Preview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>URL</th>
+                                    <th>Method</th>
+                                </tr>
+                            </thead>
+                            <tbody id="previewBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary" onclick="previewAPIs()">
+                    <i class="bi bi-eye me-1"></i>Preview APIs
+                </button>
+                <div>
+                    <a href="/admin" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-admin">
+                        <i class="bi bi-check-lg me-1"></i>
+                        {{ "Create Customer" if is_new else "Save Changes" }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden field to store combined API text -->
+    <input type="hidden" name="api_text" id="api_text_combined">
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Disable auto-refresh for admin pages
+    countdown = 999999;
+
+    // Auto-generate customer ID from name
+    document.getElementById('name').addEventListener('input', function() {
+        const customerIdInput = document.getElementById('customer_id');
+        if (!customerIdInput.readOnly && !customerIdInput.value) {
+            const slug = this.value.toLowerCase()
+                .replace(/[^\w\s-]/g, '')
+                .replace(/[-\s]+/g, '_')
+                .trim();
+            customerIdInput.placeholder = slug || 'Auto-generated from name';
+        }
+    });
+
+    // Combine API text fields before form submission
+    document.getElementById('customerForm').addEventListener('submit', function(e) {
+        const format = document.getElementById('api_format').value;
+        let apiText = '';
+
+        if (format === 'simple') {
+            apiText = document.getElementById('api_text_simple').value;
+        } else if (format === 'name_url') {
+            apiText = document.getElementById('api_text_name_url').value;
+        }
+
+        document.getElementById('api_text_combined').value = apiText;
+    });
+
+    // Preview APIs locally without server call
+    function previewAPIs() {
+        const format = document.getElementById('api_format').value;
+        let text = '';
+
+        if (format === 'simple') {
+            text = document.getElementById('api_text_simple').value;
+        } else if (format === 'name_url') {
+            text = document.getElementById('api_text_name_url').value;
+        } else if (format === 'postman') {
+            alert('Preview is not available for Postman uploads. The APIs will be parsed after upload.');
+            return;
+        }
+
+        if (!text.trim()) {
+            alert('Please enter some API URLs first.');
+            return;
+        }
+
+        const apis = parseAPIs(format, text);
+        displayPreview(apis);
+    }
+
+    function parseAPIs(format, text) {
+        const lines = text.trim().split('\n');
+        const apis = [];
+
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith('#')) continue;
+
+            let name, url;
+
+            if (format === 'name_url' && trimmed.includes('|')) {
+                const parts = trimmed.split('|', 2);
+                name = parts[0].trim();
+                url = parts[1].trim();
+            } else {
+                url = trimmed;
+                name = extractNameFromUrl(url);
+            }
+
+            apis.push({ name, url, method: 'POST' });
+        }
+
+        return apis;
+    }
+
+    function extractNameFromUrl(url) {
+        try {
+            const parsed = new URL(url);
+            const path = parsed.pathname.replace(/^\/|\/$/g, '');
+            if (path) {
+                const parts = path.split('/').slice(-2);
+                return parts.map(p => p.replace(/[_-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())).join(' ');
+            }
+            return parsed.hostname || 'Unknown API';
+        } catch {
+            return 'Unknown API';
+        }
+    }
+
+    function displayPreview(apis) {
+        const previewCard = document.getElementById('previewCard');
+        const previewBody = document.getElementById('previewBody');
+
+        if (apis.length === 0) {
+            previewCard.style.display = 'none';
+            return;
+        }
+
+        previewBody.innerHTML = '';
+        apis.forEach((api, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${escapeHtml(api.name)}</td>
+                <td><code class="small">${escapeHtml(api.url)}</code></td>
+                <td><span class="badge bg-primary">${api.method}</span></td>
+            `;
+            previewBody.appendChild(row);
+        });
+
+        previewCard.style.display = 'block';
+        previewCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+{% endblock %}

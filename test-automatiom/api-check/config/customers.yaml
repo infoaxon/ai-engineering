@@ -1,0 +1,19 @@
+customers:
+  rgi_indusind:
+    name: RGI IndusInd
+    description: Reliance General Insurance - IndusInd Bank Partnership
+    postman_collection: collections/RGI_premium_APIs.postman_collection
+    environments:
+    - dev
+    - sit
+    - uat
+    - production
+    active: true
+  test_customer:
+    name: Test Customer
+    description: A test customer
+    postman_collection: collections/test_customer.postman_collection.json
+    environments:
+    - dev
+    - sit
+    active: true

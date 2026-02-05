@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}{{ env.name }} - {{ customer_name }} - API Health Check{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="/dashboard/{{ customer_id }}">{{ customer_name }}</a></li>
+        <li class="breadcrumb-item active">{{ env.name }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">
+        <i class="bi bi-server me-2"></i>
+        {{ env.name }}
+        <small class="text-muted">({{ env.env_key }})</small>
+    </h4>
+    <button class="btn btn-outline-primary btn-sm" onclick="triggerCheck()">
+        <i class="bi bi-arrow-clockwise me-1"></i>
+        Check Now
+    </button>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="stat-number">{{ env.total_apis }}</div>
+                <div class="stat-label">Total APIs</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+            <div class="card-body text-center">
+                <div class="stat-number text-success">{{ env.healthy_count }}</div>
+                <div class="stat-label">Healthy</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-warning bg-opacity-10">
+            <div class="card-body text-center">
+                <div class="stat-number text-warning">{{ env.degraded_count }}</div>
+                <div class="stat-label">Degraded</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-danger bg-opacity-10">
+            <div class="card-body text-center">
+                <div class="stat-number text-danger">{{ env.unhealthy_count }}</div>
+                <div class="stat-label">Unhealthy</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Last check info -->
+<div class="mb-4 text-muted">
+    <i class="bi bi-clock me-1"></i>
+    Last check:
+    {% if env.last_check %}
+        <span class="utc-time" data-utc="{{ env.last_check.strftime('%Y-%m-%dT%H:%M:%S') }}">{{ env.last_check.strftime('%Y-%m-%d %H:%M:%S') }} UTC</span>
+    {% else %}
+        Never
+    {% endif %}
+    <span class="ms-3">
+        <i class="bi bi-gear me-1"></i>
+        Check interval: {{ settings.check_interval_minutes }} minutes
+    </span>
+</div>
+
+<!-- API Status Table -->
+{% if env.apis %}
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <h6 class="mb-0">
+            <i class="bi bi-list-check me-2"></i>
+            API Status
+        </h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover api-table mb-0">
+            <thead>
+                <tr>
+                    <th>Status</th>
+                    <th>API Name</th>
+                    <th>Latency</th>
+                    <th>Threshold</th>
+                    <th>Uptime (24h)</th>
+                    <th>Last Error</th>
+                    <th>Last Check</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for api in env.apis %}
+                {% set config = api_configs.get(api.api_name) %}
+                <tr>
+                    <td>
+                        {% if api.current_status.value == 'healthy' %}
+                            <span class="badge status-badge status-healthy">
+                                <i class="bi bi-check-circle me-1"></i>Healthy
+                            </span>
+                        {% elif api.current_status.value == 'degraded' %}
+                            <span class="badge status-badge status-degraded">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Degraded
+                            </span>
+                        {% elif api.current_status.value == 'unhealthy' %}
+                            <span class="badge status-badge status-unhealthy">
+                                <i class="bi bi-x-circle me-1"></i>Unhealthy
+                            </span>
+                        {% else %}
+                            <span class="badge status-badge status-unknown">
+                                <i class="bi bi-question-circle me-1"></i>Unknown
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ api.api_name }}</strong>
+                        {% if config %}
+                        <br>
+                        <small class="text-muted">{{ config.url[:60] }}{% if config.url|length > 60 %}...{% endif %}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if api.last_latency_ms %}
+                            {% set threshold = config.latency_threshold_ms if config and config.latency_threshold_ms else settings.latency_threshold_ms %}
+                            {% if api.last_latency_ms <= threshold * 0.5 %}
+                                <span class="latency-good fw-bold">{{ "%.0f"|format(api.last_latency_ms) }} ms</span>
+                            {% elif api.last_latency_ms <= threshold %}
+                                <span class="latency-slow fw-bold">{{ "%.0f"|format(api.last_latency_ms) }} ms</span>
+                            {% else %}
+                                <span class="latency-bad fw-bold">{{ "%.0f"|format(api.last_latency_ms) }} ms</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if config and config.latency_threshold_ms %}
+                            {{ config.latency_threshold_ms }} ms
+                        {% else %}
+                            {{ settings.latency_threshold_ms }} ms
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if api.uptime_24h is not none %}
+                            <div class="d-flex align-items-center">
+                                <div class="uptime-bar flex-grow-1 me-2" style="width: 60px;">
+                                    <div class="uptime-bar-fill
+                                        {% if api.uptime_24h >= 99 %}bg-success
+                                        {% elif api.uptime_24h >= 95 %}bg-warning
+                                        {% else %}bg-danger{% endif %}"
+                                        style="width: {{ api.uptime_24h }}%;">
+                                    </div>
+                                </div>
+                                <span class="small">{{ "%.1f"|format(api.uptime_24h) }}%</span>
+                            </div>
+                            <small class="text-muted">{{ api.check_count_24h }} checks</small>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if api.last_error %}
+                            <span class="error-message" title="{{ api.last_error }}">
+                                {{ api.last_error[:50] }}{% if api.last_error|length > 50 %}...{% endif %}
+                            </span>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if api.last_check %}
+                            <small class="utc-time" data-utc="{{ api.last_check.strftime('%Y-%m-%dT%H:%M:%S') }}">{{ api.last_check.strftime('%H:%M:%S') }}</small>
+                        {% else %}
+                            <span class="text-muted">Never</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>
+    No APIs configured for this environment.
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function triggerCheck() {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Checking...';
+
+        try {
+            const response = await fetch('/api/check', { method: 'POST' });
+            const result = await response.json();
+
+            if (result.status === 'ok') {
+                // Force hard reload bypassing cache
+                window.location.href = window.location.pathname + '?t=' + Date.now();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (err) {
+            alert('Failed to trigger check: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Check Now';
+        }
+    }
+</script>
+{% endblock %}

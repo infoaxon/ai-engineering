@@ -1,0 +1,47 @@
+## Premium Calculation APIs 
+# Health Insurance 
+
+https://rgipartners.reliancegeneral.co.in:9443/api/Services/PremiumCalulationForHealth
+https://rgipartners.reliancegeneral.co.in:9443/api/HealthInfinityAPIService/PremiumCalulationForHealthInfinity
+https://rgipartners.reliancegeneral.co.in:9443/api/SuperTopUpAPISerivice/PremiumCalulationForSuperTopUpAPI
+https://rgipartners.reliancegeneral.co.in:9443/api/ArogyaSanjeevniAPIService/PremiumCalulationForArogyaSanjeevniAPI
+https://rgipartners.reliancegeneral.co.in/API/HealthService/PremiumCalculationForCI
+https://rgipartners.reliancegeneral.co.in:9443/api/HospicareAPIService/PremiumCalulationForHospicareAPI
+https://rgipartners.reliancegeneral.co.in/API/Service/PremiumCalulationForHealthwise
+
+# Travel
+
+https://rgipartners.reliancegeneral.co.in/API/Service/PremiumCalulationForTravel
+
+# Motor
+
+https://rgipartners.reliancegeneral.co.in/API/Service/PremiumCalulationForMotor
+
+# Bike
+https://rgipartners.reliancegeneral.co.in/API/Service/PremiumCalulationForMotor
+ 
+## Coverage APIs 
+ 
+# Travel
+https://rgipartners.reliancegeneral.co.in/API/Service/CoverageDetailsForTravel
+
+#Motor (includes Bike as well)
+https://rgipartners.reliancegeneral.co.in/API/Service/CoverageDetailsForMotor
+ 
+## Fetch Renewal APIs 
+ 
+ 
+# Health (Renewal)
+https://rgipartners.reliancegeneral.co.in:9443/api/Services/PremiumCalulationInputForRenewal
+https://rgipartners.reliancegeneral.co.in:9443/API/HealthInfinityAPIService/PremiumCalulationForHIRenewal
+https://rgipartners.reliancegeneral.co.in:9443/api/ArogyaSanjeevniAPIService/PremiumCalulationForASRenewal
+https://rgipartners.reliancegeneral.co.in:9443/API/Service/PremiumCalulationForHealthwiseRenewal
+https://rgipartners.reliancegeneral.co.in:9443/api/HospicareAPIService/PremiumCalulationForHCRenewal
+https://rgipartners.reliancegeneral.co.in:9443/API/SuperTopUpAPISerivice/PremiumCalulationForRSTUPRenewal
+
+#Motor (Renewal)
+https://rgipartners.reliancegeneral.co.in/API/Service/PremiumCalulationForMotorRenewal
+
+#Bike (Renewal)
+https://rgipartners.reliancegeneral.co.in/API/Service/PremiumCalulationForMotorRenewal
+ 

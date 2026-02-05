@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}{{ customer.name }} - API Health Check{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item active">{{ customer.name }}</li>
+    </ol>
+</nav>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0">
+            <i class="bi bi-building me-2"></i>
+            {{ customer.name }}
+        </h4>
+        {% if customer.description %}
+        <small class="text-muted">{{ customer.description }}</small>
+        {% endif %}
+    </div>
+    <button class="btn btn-outline-primary btn-sm" onclick="triggerCheck()">
+        <i class="bi bi-arrow-clockwise me-1"></i>
+        Check Now
+    </button>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="stat-number">{{ customer.total_apis }}</div>
+                <div class="stat-label">Total APIs</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+            <div class="card-body text-center">
+                <div class="stat-number text-success">{{ customer.healthy_count }}</div>
+                <div class="stat-label">Healthy</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-warning bg-opacity-10">
+            <div class="card-body text-center">
+                <div class="stat-number text-warning">{{ customer.degraded_count }}</div>
+                <div class="stat-label">Degraded</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-danger bg-opacity-10">
+            <div class="card-body text-center">
+                <div class="stat-number text-danger">{{ customer.unhealthy_count }}</div>
+                <div class="stat-label">Unhealthy</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Environment Cards -->
+<h5 class="mb-3"><i class="bi bi-layers me-2"></i>Environments</h5>
+<div class="row g-4">
+    {% for env in customer.environments %}
+    <div class="col-md-6 col-lg-3">
+        <div class="card env-card h-100 shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span>{{ env.name }}</span>
+                <span class="badge bg-light text-dark">{{ env.total_apis }} APIs</span>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <div class="stat-number text-success" style="font-size: 1.5rem;">{{ env.healthy_count }}</div>
+                        <div class="stat-label">Healthy</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-number text-warning" style="font-size: 1.5rem;">{{ env.degraded_count }}</div>
+                        <div class="stat-label">Degraded</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="stat-number text-danger" style="font-size: 1.5rem;">{{ env.unhealthy_count }}</div>
+                        <div class="stat-label">Unhealthy</div>
+                    </div>
+                </div>
+
+                {% if env.total_apis > 0 %}
+                <div class="progress mb-3" style="height: 8px;">
+                    {% set healthy_pct = (env.healthy_count / env.total_apis * 100) if env.total_apis > 0 else 0 %}
+                    {% set degraded_pct = (env.degraded_count / env.total_apis * 100) if env.total_apis > 0 else 0 %}
+                    {% set unhealthy_pct = (env.unhealthy_count / env.total_apis * 100) if env.total_apis > 0 else 0 %}
+                    <div class="progress-bar bg-success" style="width: {{ healthy_pct }}%"></div>
+                    <div class="progress-bar bg-warning" style="width: {{ degraded_pct }}%"></div>
+                    <div class="progress-bar bg-danger" style="width: {{ unhealthy_pct }}%"></div>
+                </div>
+                {% endif %}
+
+                <div class="small text-muted mb-3">
+                    <i class="bi bi-clock me-1"></i>
+                    Last check:
+                    {% if env.last_check %}
+                        <span class="utc-time" data-utc="{{ env.last_check.strftime('%Y-%m-%dT%H:%M:%S') }}">{{ env.last_check.strftime('%H:%M:%S') }}</span>
+                    {% else %}
+                        Never
+                    {% endif %}
+                </div>
+
+                <!-- Quick status list -->
+                {% if env.apis %}
+                <ul class="list-unstyled mb-0 small">
+                    {% for api in env.apis[:3] %}
+                    <li class="mb-1">
+                        <span class="status-indicator {{ api.current_status.value }}"></span>
+                        {{ api.api_name }}
+                        {% if api.last_latency_ms %}
+                            <span class="float-end text-muted">{{ "%.0f"|format(api.last_latency_ms) }}ms</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                    {% if env.apis|length > 3 %}
+                    <li class="text-muted">+ {{ env.apis|length - 3 }} more...</li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-transparent">
+                <a href="/dashboard/{{ customer.customer_id }}/{{ env.env_key }}" class="btn btn-outline-secondary btn-sm w-100">
+                    View Details
+                    <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function triggerCheck() {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Checking...';
+
+        try {
+            const response = await fetch('/api/check', { method: 'POST' });
+            const result = await response.json();
+
+            if (result.status === 'ok') {
+                // Force hard reload bypassing cache
+                window.location.href = window.location.pathname + '?t=' + Date.now();
+            } else {
+                alert('Error: ' + result.message);
+            }
+        } catch (err) {
+            alert('Failed to trigger check: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Check Now';
+        }
+    }
+</script>
+{% endblock %}

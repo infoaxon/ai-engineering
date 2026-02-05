@@ -1,0 +1,156 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Admin Dashboard - API Health Check{% endblock %}
+
+{% block content %}
+<!-- Success/Error Messages -->
+{% if request.query_params.get('success') %}
+<div class="alert alert-success alert-dismissible fade show alert-message" role="alert">
+    {% if request.query_params.get('success') == 'created' %}
+    Customer created successfully!
+    {% elif request.query_params.get('success') == 'updated' %}
+    Customer updated successfully!
+    {% elif request.query_params.get('success') == 'deleted' %}
+    Customer deleted successfully!
+    {% else %}
+    Operation completed successfully!
+    {% endif %}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">
+            <i class="bi bi-gear-fill me-2"></i>Admin Dashboard
+        </h2>
+        <small class="text-muted">Manage customers and API configurations</small>
+    </div>
+    <div>
+        <a href="/dashboard" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+        </a>
+        <a href="/admin/customer/new" class="btn btn-admin">
+            <i class="bi bi-plus-lg me-1"></i>Add Customer
+        </a>
+    </div>
+</div>
+
+<div class="card card-admin shadow-sm">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">
+            <i class="bi bi-people me-2"></i>Customers
+            <span class="badge bg-secondary ms-2">{{ customers|length }}</span>
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        {% if customers %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-admin">
+                    <tr>
+                        <th>Customer</th>
+                        <th>ID</th>
+                        <th>Environments</th>
+                        <th>APIs</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                    <tr>
+                        <td>
+                            <strong>{{ customer.name }}</strong>
+                            {% if customer.description %}
+                            <br><small class="text-muted">{{ customer.description }}</small>
+                            {% endif %}
+                        </td>
+                        <td><code>{{ customer.id }}</code></td>
+                        <td>
+                            {% for env in customer.environments %}
+                            <span class="badge bg-secondary env-badge">{{ env }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>{{ customer.api_count }}</td>
+                        <td>
+                            {% if customer.active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="/dashboard/{{ customer.id }}" class="btn btn-outline-primary" title="View Dashboard">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="/admin/customer/{{ customer.id }}" class="btn btn-outline-secondary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger"
+                                        onclick="confirmDelete('{{ customer.id }}', '{{ customer.name }}')" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+            <p class="text-muted mt-3">No customers configured yet.</p>
+            <a href="/admin/customer/new" class="btn btn-admin">
+                <i class="bi bi-plus-lg me-1"></i>Add Your First Customer
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete customer <strong id="deleteCustomerName"></strong>?</p>
+                <p class="text-danger small">This action cannot be undone. All configuration and API data for this customer will be permanently removed.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(() => {
+        document.querySelectorAll('.alert-message').forEach(alert => {
+            alert.classList.remove('show');
+            setTimeout(() => alert.remove(), 150);
+        });
+    }, 5000);
+
+    // Disable auto-refresh for admin pages
+    countdown = 999999;
+
+    function confirmDelete(customerId, customerName) {
+        document.getElementById('deleteCustomerName').textContent = customerName;
+        document.getElementById('deleteForm').action = '/admin/customer/' + customerId + '/delete';
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+</script>
+{% endblock %}
