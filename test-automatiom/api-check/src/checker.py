@@ -45,7 +45,11 @@ def find_error_field(data: dict | list, field_name: str) -> tuple[bool, str | No
                     return True, error_msg
 
                 if isinstance(value, dict):
-                    err_msg = value.get('ErrMessages') or value.get('ErrorMessage') or value.get('Message')
+                    err_msg = (
+                        value.get("ErrMessages")
+                        or value.get("ErrorMessage")
+                        or value.get("Message")
+                    )
                     if err_msg and isinstance(err_msg, str) and err_msg.strip():
                         return True, str(value)[:200]
                     if is_error_value_empty(value):
@@ -73,7 +77,7 @@ async def check_api_health(
     environment: str,
     customer_id: str = "default",
     default_timeout: int = 30,
-    default_latency_threshold: int = 2000
+    default_latency_threshold: int = 2000,
 ) -> HealthCheckResult:
     """Perform health check on a single API endpoint."""
     timestamp = datetime.utcnow()
@@ -91,7 +95,7 @@ async def check_api_health(
                     headers["Content-Type"] = api.content_type
                 elif "<" in api.raw_body[:50]:
                     headers["Content-Type"] = "text/xml"
-                elif api.raw_body.strip().startswith('{'):
+                elif api.raw_body.strip().startswith("{"):
                     headers["Content-Type"] = "application/json"
 
             json_body = api.body if not api.raw_body else None
@@ -102,21 +106,33 @@ async def check_api_health(
                 response = await client.get(api.url, headers=headers)
             elif api.method == HTTPMethod.POST:
                 if content:
-                    response = await client.post(api.url, headers=headers, content=content)
+                    response = await client.post(
+                        api.url, headers=headers, content=content
+                    )
                 else:
-                    response = await client.post(api.url, headers=headers, json=json_body)
+                    response = await client.post(
+                        api.url, headers=headers, json=json_body
+                    )
             elif api.method == HTTPMethod.PUT:
                 if content:
-                    response = await client.put(api.url, headers=headers, content=content)
+                    response = await client.put(
+                        api.url, headers=headers, content=content
+                    )
                 else:
-                    response = await client.put(api.url, headers=headers, json=json_body)
+                    response = await client.put(
+                        api.url, headers=headers, json=json_body
+                    )
             elif api.method == HTTPMethod.DELETE:
                 response = await client.delete(api.url, headers=headers)
             elif api.method == HTTPMethod.PATCH:
                 if content:
-                    response = await client.patch(api.url, headers=headers, content=content)
+                    response = await client.patch(
+                        api.url, headers=headers, content=content
+                    )
                 else:
-                    response = await client.patch(api.url, headers=headers, json=json_body)
+                    response = await client.patch(
+                        api.url, headers=headers, json=json_body
+                    )
             elif api.method == HTTPMethod.HEAD:
                 response = await client.head(api.url, headers=headers)
             else:
@@ -136,12 +152,14 @@ async def check_api_health(
                         status_code=response.status_code,
                         latency_ms=latency_ms,
                         error_message=f"HTTP error: {response.status_code}",
-                        response_valid=False
+                        response_valid=False,
                     )
 
                 try:
                     response_json = response.json()
-                    has_errors, error_msg = find_error_field(response_json, api.error_field)
+                    has_errors, error_msg = find_error_field(
+                        response_json, api.error_field
+                    )
 
                     if has_errors:
                         return HealthCheckResult(
@@ -153,7 +171,7 @@ async def check_api_health(
                             status_code=response.status_code,
                             latency_ms=latency_ms,
                             error_message=f"{api.error_field}: {error_msg}",
-                            response_valid=False
+                            response_valid=False,
                         )
                 except Exception as e:
                     return HealthCheckResult(
@@ -165,7 +183,7 @@ async def check_api_health(
                         status_code=response.status_code,
                         latency_ms=latency_ms,
                         error_message=f"Failed to parse response: {str(e)}",
-                        response_valid=False
+                        response_valid=False,
                     )
             else:
                 if response.status_code != api.expected_status:
@@ -178,7 +196,7 @@ async def check_api_health(
                         status_code=response.status_code,
                         latency_ms=latency_ms,
                         error_message=f"Expected status {api.expected_status}, got {response.status_code}",
-                        response_valid=False
+                        response_valid=False,
                     )
 
             if latency_ms > latency_threshold:
@@ -191,7 +209,7 @@ async def check_api_health(
                     status_code=response.status_code,
                     latency_ms=latency_ms,
                     error_message=f"Latency {latency_ms:.0f}ms exceeds threshold {latency_threshold}ms",
-                    response_valid=True
+                    response_valid=True,
                 )
 
             return HealthCheckResult(
@@ -202,7 +220,7 @@ async def check_api_health(
                 status=HealthStatus.HEALTHY,
                 status_code=response.status_code,
                 latency_ms=latency_ms,
-                response_valid=True
+                response_valid=True,
             )
 
     except httpx.TimeoutException:
@@ -213,7 +231,7 @@ async def check_api_health(
             timestamp=timestamp,
             status=HealthStatus.UNHEALTHY,
             error_message=f"Request timed out after {timeout}s",
-            response_valid=False
+            response_valid=False,
         )
     except httpx.ConnectError as e:
         return HealthCheckResult(
@@ -223,7 +241,7 @@ async def check_api_health(
             timestamp=timestamp,
             status=HealthStatus.UNHEALTHY,
             error_message=f"Connection failed: {str(e)}",
-            response_valid=False
+            response_valid=False,
         )
     except Exception as e:
         return HealthCheckResult(
@@ -233,7 +251,7 @@ async def check_api_health(
             timestamp=timestamp,
             status=HealthStatus.UNHEALTHY,
             error_message=f"Unexpected error: {str(e)}",
-            response_valid=False
+            response_valid=False,
         )
 
 
@@ -242,18 +260,14 @@ async def check_environment(
     apis: list[APIConfig],
     customer_id: str = "default",
     default_timeout: int = 30,
-    default_latency_threshold: int = 2000
+    default_latency_threshold: int = 2000,
 ) -> list[HealthCheckResult]:
     """Check all APIs in an environment."""
     results = []
 
     for api in apis:
         result = await check_api_health(
-            api,
-            env_key,
-            customer_id,
-            default_timeout,
-            default_latency_threshold
+            api, env_key, customer_id, default_timeout, default_latency_threshold
         )
         results.append(result)
 

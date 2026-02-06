@@ -9,11 +9,16 @@ customers:
     - uat
     - production
     active: true
-  test_customer:
-    name: Test Customer
-    description: A test customer
-    postman_collection: collections/test_customer.postman_collection.json
+  indusind_nippon_life_insurance:
+    name: IndusInd Nippon Life Insurance
+    description: IndusInd Nippon Life Insurance
+    postman_collection: collections/indusind_nippon_life_insurance.postman_collection.json
     environments:
     - dev
-    - sit
     active: true
+    postman_collections:
+    - collections/indusind_nippon_life_insurance/1770332518_Super_Suraksha.postman_collection.json
+    - collections/indusind_nippon_life_insurance/1770332518_Generate_PaymentURL.postman_collection.json
+    - collections/indusind_nippon_life_insurance/1770332518_Communication_APIs.postman_collection.json
+    - collections/indusind_nippon_life_insurance.postman_collection.json
+    - collections/indusind_nippon_life_insurance/1770332518_Agent_Microsite.postman_collection.json

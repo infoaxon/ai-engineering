@@ -42,14 +42,14 @@ class HealthCheckScheduler:
                         env_config.apis,
                         customer_id=customer_id,
                         default_timeout=settings.default_timeout_seconds,
-                        default_latency_threshold=settings.latency_threshold_ms
+                        default_latency_threshold=settings.latency_threshold_ms,
                     )
 
                     await self.storage.store_results(results)
 
-                    healthy = sum(1 for r in results if r.status.value == 'healthy')
-                    degraded = sum(1 for r in results if r.status.value == 'degraded')
-                    unhealthy = sum(1 for r in results if r.status.value == 'unhealthy')
+                    healthy = sum(1 for r in results if r.status.value == "healthy")
+                    degraded = sum(1 for r in results if r.status.value == "degraded")
+                    unhealthy = sum(1 for r in results if r.status.value == "unhealthy")
 
                     logger.info(
                         f"Customer '{customer_id}' Environment '{env_key}': "
@@ -57,7 +57,9 @@ class HealthCheckScheduler:
                     )
 
                 except Exception as e:
-                    logger.error(f"Error checking customer '{customer_id}' environment '{env_key}': {e}")
+                    logger.error(
+                        f"Error checking customer '{customer_id}' environment '{env_key}': {e}"
+                    )
 
     def _sync_run_checks(self) -> None:
         """Synchronous wrapper for running checks (for APScheduler)."""
@@ -77,17 +79,17 @@ class HealthCheckScheduler:
         self.scheduler.add_job(
             self._sync_run_checks,
             trigger=IntervalTrigger(minutes=interval_minutes),
-            id='health_check_job',
-            name='API Health Checks',
-            replace_existing=True
+            id="health_check_job",
+            name="API Health Checks",
+            replace_existing=True,
         )
 
         self.scheduler.add_job(
             self._sync_cleanup,
             trigger=IntervalTrigger(hours=24),
-            id='cleanup_job',
-            name='Cleanup Old Records',
-            replace_existing=True
+            id="cleanup_job",
+            name="Cleanup Old Records",
+            replace_existing=True,
         )
 
         self.scheduler.start()
@@ -97,6 +99,7 @@ class HealthCheckScheduler:
 
     def _sync_cleanup(self) -> None:
         """Synchronous wrapper for cleanup."""
+
         async def cleanup():
             deleted = await self.storage.cleanup_old_records(7)
             logger.info(f"Cleaned up {deleted} old records")

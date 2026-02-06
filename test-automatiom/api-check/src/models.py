@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 class HealthStatus(str, Enum):
     """Health status of an API endpoint."""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
@@ -17,6 +18,7 @@ class HealthStatus(str, Enum):
 
 class HTTPMethod(str, Enum):
     """Supported HTTP methods."""
+
     GET = "GET"
     POST = "POST"
     PUT = "PUT"
@@ -27,6 +29,7 @@ class HTTPMethod(str, Enum):
 
 class ContentType(str, Enum):
     """Supported content types."""
+
     JSON = "application/json"
     XML = "application/xml"
     TEXT_XML = "text/xml"
@@ -35,6 +38,7 @@ class ContentType(str, Enum):
 
 class APIConfig(BaseModel):
     """Configuration for a single API endpoint."""
+
     name: str
     url: str
     method: HTTPMethod = HTTPMethod.GET
@@ -53,30 +57,52 @@ class APIConfig(BaseModel):
 
 class EnvironmentConfig(BaseModel):
     """Configuration for an environment."""
+
     name: str
     apis: list[APIConfig] = Field(default_factory=list)
 
 
 class CustomerConfig(BaseModel):
     """Configuration for a customer."""
+
     customer_id: str
     name: str
     description: str = ""
-    postman_collection: str
-    environments: list[str] = Field(default_factory=lambda: ["dev", "sit", "uat", "production"])
+    postman_collection: str = ""  # Legacy single collection (backward compatibility)
+    postman_collections: list[str] = Field(default_factory=list)  # Multiple collections
+    environments: list[str] = Field(
+        default_factory=lambda: ["dev", "sit", "uat", "production"]
+    )
     active: bool = True
+
+    @property
+    def all_collections(self) -> list[str]:
+        """Get all collection paths (merges legacy and new list for backward compatibility)."""
+        collections = []
+        # Add legacy single collection if present
+        if self.postman_collection:
+            collections.append(self.postman_collection)
+        # Add new multiple collections
+        for coll in self.postman_collections:
+            if coll and coll not in collections:
+                collections.append(coll)
+        return collections
 
 
 class CustomerCreateRequest(BaseModel):
     """Request model for creating/updating a customer via admin interface."""
+
     name: str
     description: str = ""
     customer_id: str | None = None
-    environments: list[str] = Field(default_factory=lambda: ["dev", "sit", "uat", "production"])
+    environments: list[str] = Field(
+        default_factory=lambda: ["dev", "sit", "uat", "production"]
+    )
 
 
 class Settings(BaseModel):
     """Global application settings."""
+
     check_interval_minutes: int = 5
     default_timeout_seconds: int = 30
     latency_threshold_ms: int = 2000
@@ -85,6 +111,7 @@ class Settings(BaseModel):
 
 class AppConfig(BaseModel):
     """Complete application configuration for a customer."""
+
     customer_id: str = "default"
     settings: Settings = Field(default_factory=Settings)
     environments: dict[str, EnvironmentConfig] = Field(default_factory=dict)
@@ -92,6 +119,7 @@ class AppConfig(BaseModel):
 
 class HealthCheckResult(BaseModel):
     """Result of a single health check."""
+
     customer_id: str = "default"
     api_name: str
     environment: str
@@ -105,6 +133,7 @@ class HealthCheckResult(BaseModel):
 
 class APIStatus(BaseModel):
     """Current status of an API with recent history."""
+
     customer_id: str = "default"
     api_name: str
     environment: str
@@ -118,6 +147,7 @@ class APIStatus(BaseModel):
 
 class EnvironmentStatus(BaseModel):
     """Status summary for an environment."""
+
     customer_id: str = "default"
     env_key: str
     name: str
@@ -131,6 +161,7 @@ class EnvironmentStatus(BaseModel):
 
 class CustomerStatus(BaseModel):
     """Status summary for a customer."""
+
     customer_id: str
     name: str
     description: str = ""

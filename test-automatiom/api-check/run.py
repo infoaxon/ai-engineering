@@ -8,26 +8,19 @@ import uvicorn
 def main():
     parser = argparse.ArgumentParser(description="API Health Check Dashboard")
     parser.add_argument(
-        "--host",
-        default="0.0.0.0",
-        help="Host to bind to (default: 0.0.0.0)"
+        "--host", default="0.0.0.0", help="Host to bind to (default: 0.0.0.0)"
     )
     parser.add_argument(
-        "--port",
-        type=int,
-        default=8081,
-        help="Port to bind to (default: 8081)"
+        "--port", type=int, default=8081, help="Port to bind to (default: 8081)"
     )
     parser.add_argument(
-        "--reload",
-        action="store_true",
-        help="Enable auto-reload for development"
+        "--reload", action="store_true", help="Enable auto-reload for development"
     )
     parser.add_argument(
         "--log-level",
         default="info",
         choices=["debug", "info", "warning", "error"],
-        help="Log level (default: info)"
+        help="Log level (default: info)",
     )
 
     args = parser.parse_args()
@@ -45,7 +38,7 @@ def main():
         host=args.host,
         port=args.port,
         reload=args.reload,
-        log_level=args.log_level
+        log_level=args.log_level,
     )
 
 

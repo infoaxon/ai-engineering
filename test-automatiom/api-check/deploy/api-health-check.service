@@ -1,0 +1,51 @@
+[Unit]
+Description=API Health Check Application
+Documentation=https://github.com/your-org/api-health-check
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=apihealth
+Group=apihealth
+WorkingDirectory=/opt/api-health-check
+EnvironmentFile=/etc/api-health-check.env
+
+# Application startup
+ExecStart=/opt/api-health-check/venv/bin/uvicorn src.main:app \
+    --host 127.0.0.1 \
+    --port 8081 \
+    --workers 2 \
+    --access-log \
+    --log-level info
+
+# Graceful reload
+ExecReload=/bin/kill -HUP $MAINPID
+
+# Restart policy
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/api-health-check/health_checks.db
+ReadWritePaths=/opt/api-health-check/logs
+ReadWritePaths=/opt/api-health-check/collections
+ReadWritePaths=/opt/api-health-check/config
+
+# Resource limits
+MemoryMax=512M
+CPUQuota=100%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=api-health-check
+
+[Install]
+WantedBy=multi-user.target

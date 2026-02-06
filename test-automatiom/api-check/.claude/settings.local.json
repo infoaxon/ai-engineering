@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(source:*)",
+      "Bash(python:*)",
+      "Bash(pkill:*)",
+      "Bash(chmod:*)"
+    ]
+  }
+}

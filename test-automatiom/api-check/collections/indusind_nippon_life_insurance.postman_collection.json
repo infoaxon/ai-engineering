@@ -1,0 +1,309 @@
+{
+  "info": {
+    "name": "IndusInd Nippon Life Insurance",
+    "_postman_id": "indusind_nippon_life_insurance",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "https://extapiuat.indusindnipponlife.com/EmailService/send",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/EmailService/send"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "https://extapiuat.indusindnipponlife.com/DigispiceSmsService/SendSMS",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/DigispiceSmsService/SendSMS"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "BI API",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://biuatnew.reliancenipponlife.com:442/NSureServices.svc/GenerateBIAPI"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "PIVC",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://pivcuat.indusindnipponlife.com/portal/api/CreatePIVCLink"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "Instabiz Client Enquiry - Dedup",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/client/enquiry"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "Penny Drop",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapi.reliancenipponlife.com/ACCValidation/validate"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "NSDLValidation",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/NSDLServices/NSDLValidation"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "enachregistration/initiate",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.reliancenipponlife.com/enachregistration/initiate"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "enachregistration/vpavalidation",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.reliancenipponlife.com/enachregistration/vpavalidation"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "proposal-fulfillment/drc",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://sa3dev.reliancenipponlife.com/v1.0/nams/proposal-fulfillment/drc"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "document/save",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/document/save"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "getPolicyStatus",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/policy-status/getPolicyStatus/6dRYLJc+l3bfPbGU7hXSzQ=="
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "application/save",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/application/save"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "generateKey",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{GenerateURLBaseUrl}}/OnlinePaymentIntg/services/GenerateURL"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "OnlinePaymentIntg/generatekey",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.reliancenipponlife.com/OnlinePaymentIntg/generatekey"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "nlms/push-leads - SE3",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://karma.reliancenipponlife.com/v1.0/nlms/push-leads"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "BI API",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://biuatnew.reliancenipponlife.com:442/NSureServices.svc/GenerateBIAPI"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "PIVC",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://pivcuat.indusindnipponlife.com/portal/api/CreatePIVCLink"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "Instabiz Client Enquiry - Dedup",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/client/enquiry"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "Penny Drop",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapi.reliancenipponlife.com/ACCValidation/validate"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "NSDLValidation",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/NSDLServices/NSDLValidation"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "enachregistration/initiate",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.reliancenipponlife.com/enachregistration/initiate"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "enachregistration/vpavalidation",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.reliancenipponlife.com/enachregistration/vpavalidation"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "proposal-fulfillment/drc",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://sa3dev.reliancenipponlife.com/v1.0/nams/proposal-fulfillment/drc"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "document/save",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/document/save"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "getPolicyStatus",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/policy-status/getPolicyStatus/6dRYLJc+l3bfPbGU7hXSzQ=="
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "application/save",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/application/save"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "generateKey",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{GenerateURLBaseUrl}}/OnlinePaymentIntg/services/GenerateURL"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "OnlinePaymentIntg/generatekey",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://extapiuat.reliancenipponlife.com/OnlinePaymentIntg/generatekey"
+        },
+        "header": []
+      }
+    },
+    {
+      "name": "nlms/push-leads - SE3",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "https://karma.reliancenipponlife.com/v1.0/nlms/push-leads"
+        },
+        "header": []
+      }
+    }
+  ]
+}

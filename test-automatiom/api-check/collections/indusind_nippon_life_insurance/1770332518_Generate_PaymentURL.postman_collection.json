@@ -1,0 +1,143 @@
+{
+  "info": {
+    "_postman_id": "8ebcfcbc-ca1c-44cd-8ca1-64dd8ced36e1",
+    "name": "Generate PaymentURL",
+    "description": "\n",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "47944953"
+  },
+  "item": [
+    {
+      "name": "generateKey",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "add",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:onl=\"http://onlinepayment.reliance.com\">\n   <soapenv:Header/>\n   <soapenv:Body>\n      <onl:generateKey>\n         <onl:p>\n            <onl:dAmount>205</onl:dAmount>\n            <onl:sAddInfo1>06-02-2025</onl:sAddInfo1>\n            <onl:sAddInfo2>06-02-2025</onl:sAddInfo2>\n            <onl:sAddInfo3>NA</onl:sAddInfo3>\n            <onl:sAddInfo4>NA</onl:sAddInfo4>\n            <onl:sAddInfo5>NA</onl:sAddInfo5>\n            <onl:sApplication>TABAPP</onl:sApplication>\n            <onl:sCustomerName>BHURE URMILA POPAT</onl:sCustomerName>\n            <onl:sGatewayCode>?</onl:sGatewayCode>\n            <onl:sTrxnCode>TW964500</onl:sTrxnCode>\n         </onl:p>\n      </onl:generateKey>\n   </soapenv:Body>\n</soapenv:Envelope>",
+          "options": {
+            "raw": {
+              "language": "xml"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{GenerateURLBaseUrl}}/OnlinePaymentIntg/services/GenerateURL",
+          "host": [
+            "{{GenerateURLBaseUrl}}"
+          ],
+          "path": [
+            "OnlinePaymentIntg",
+            "services",
+            "GenerateURL"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "generateKey response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "text/xml; charset=utf-8"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <generateKey xmlns=\"http://onlinepayment.reliance.com\">\n      <p>\n        <dAmount>string</dAmount>\n        <sAddInfo1>string</sAddInfo1>\n        <sAddInfo2>string</sAddInfo2>\n        <sAddInfo3>string</sAddInfo3>\n        <sAddInfo4>string</sAddInfo4>\n        <sAddInfo5>string</sAddInfo5>\n        <sApplication>string</sApplication>\n        <sCustomerName>string</sCustomerName>\n        <sGatewayCode>string</sGatewayCode>\n        <sTrxnCode>string</sTrxnCode>\n      </p>\n    </generateKey>\n  </soap:Body>\n</soap:Envelope>\n",
+              "options": {
+                "raw": {
+                  "language": "xml"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://extapiuat.reliancenipponlife.com/OnlinePaymentIntg/services/GenerateURL",
+              "protocol": "https",
+              "host": [
+                "extapiuat",
+                "reliancenipponlife",
+                "com"
+              ],
+              "path": [
+                "OnlinePaymentIntg",
+                "services",
+                "GenerateURL"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "xml",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/xml; charset=utf-8"
+            }
+          ],
+          "cookie": [],
+          "body": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <generateKeyResponse xmlns=\"http://onlinepayment.reliance.com\">\n      <generateKeyReturn>string</generateKeyReturn>\n    </generateKeyResponse>\n  </soap:Body>\n</soap:Envelope>\n"
+        }
+      ]
+    },
+    {
+      "name": "OnlinePaymentIntg/generatekey",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Cookie",
+            "value": "JSESSIONID=0000oN3zE0M--I4hGAscWQTKJYh:1gduoajqi"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"gatewayCode\": \"291\",\r\n    \"application\": \"IRNEW\",\r\n    \"customerName\": \"PRITESHKUMAR VISHNUBHAI PATEL\",\r\n    \"amount\": \"201148\",\r\n    \"trxnCode\": \"54560995\",\r\n    \"udf1\": \"2025-09-28\",\r\n    \"udf2\": \"2025-10-31\",\r\n    \"udf3\": \"\",\r\n    \"udf4\": \"\",\r\n    \"udf5\": \"\",\r\n    \"mobile\": \"9979358811\",\r\n    \"emailId\": \"ektadiya@gmail.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://extapiuat.reliancenipponlife.com/OnlinePaymentIntg/generatekey",
+          "protocol": "https",
+          "host": [
+            "extapiuat",
+            "reliancenipponlife",
+            "com"
+          ],
+          "path": [
+            "OnlinePaymentIntg",
+            "generatekey"
+          ]
+        },
+        "description": "Generated from cURL: curl --location 'https://extapiuat.reliancenipponlife.com/OnlinePaymentIntg/generatekey' \\\r\n--header 'Content-Type: application/json' \\\r\n--header 'Cookie: JSESSIONID=0000oN3zE0M--I4hGAscWQTKJYh:1gduoajqi' \\\r\n--data-raw '{\r\n    \"gatewayCode\": \"291\",\r\n    \"application\": \"IRNEW\",\r\n    \"customerName\": \"PRITESHKUMAR VISHNUBHAI PATEL\",\r\n    \"amount\": \"201148\",\r\n    \"trxnCode\": \"54560995\",\r\n    \"udf1\": \"2025-09-28\",\r\n    \"udf2\": \"2025-10-31\",\r\n    \"udf3\": \"\",\r\n    \"udf4\": \"\",\r\n    \"udf5\": \"\",\r\n    \"mobile\": \"9979358811\",\r\n    \"emailId\": \"ektadiya@gmail.com\"\r\n}'"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "GenerateURLBaseUrl",
+      "value": "https://extapiuat.reliancenipponlife.com",
+      "type": "any"
+    }
+  ]
+}

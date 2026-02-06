@@ -1,0 +1,475 @@
+{
+  "info": {
+    "_postman_id": "a9a78e99-dae5-4362-a2da-79fa75c7dc2e",
+    "name": "Super Suraksha",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "47944953"
+  },
+  "item": [
+    {
+      "name": "BI API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"APIKey\": \"E91EF981169447A56C620FA9366A6C73EDECB9CA8555BAC01E41D8599A4E540A0F2EEC134AF82C59BA88A14DCBB87C193E3809F10E42D2C9373115B670A19895\",\n    \"formInputs\": [\n        {\n            \"key\": \"@LI_NAME\",\n            \"value\": \"Vibhuti|Classicplanii\"\n        },\n        {\n            \"key\": \"@PROPOSER_NAME\",\n            \"value\": \"Vibhuti|Classicplanii\"\n        },\n        {\n            \"key\": \"@LI_ENTRY_AGE\",\n            \"value\": \"56\"\n        },\n        {\n            \"key\": \"@LI_DOB\",\n            \"value\": \"15 Oct 1968\"\n        },\n        {\n            \"key\": \"@LI_GENDER\",\n            \"value\": \"M\"\n        },\n        {\n            \"key\": \"@LI_STATE\",\n            \"value\": \"0\"\n        },\n        {\n            \"key\": \"@COMPANY_STATE\",\n            \"value\": \"0\"\n        },\n        {\n            \"key\": \"@GSTIN\",\n            \"value\": \"\"\n        },\n        {\n            \"key\": \"@GSTIN_Number\",\n            \"value\": \"\"\n        },\n        {\n            \"key\": \"@PROPOSER_DOB\",\n            \"value\": \"15 Oct 1968\"\n        },\n        {\n            \"key\": \"@PROPOSER_AGE\",\n            \"value\": \"56\"\n        },\n        {\n            \"key\": \"@PROPOSER_GENDER\",\n            \"value\": \"M\"\n        },\n        {\n            \"key\": \"@SameProposer\",\n            \"value\": \"True\"\n        },\n        {\n            \"key\": \"@INPUT_MODE\",\n            \"value\": \"5\"\n        },\n        {\n            \"key\": \"@PR_ID\",\n            \"value\": \"22018\"\n        },\n        {\n            \"key\": \"@PR_PT\",\n            \"value\": \"15\"\n        },\n        {\n            \"key\": \"@PR_PPT\",\n            \"value\": \"1\"\n        },\n        {\n            \"key\": \"@AGENT_ID\",\n            \"value\": \"\"\n        },\n        {\n            \"key\": \"@LI_MOBILENO\",\n            \"value\": \"8888888888\"\n        },\n        {\n            \"key\": \"@LI_EMAILID\",\n            \"value\": \"vibhuti@gmail.com\"\n        },\n        {\n            \"key\": \"@KFD\",\n            \"value\": \"E\"\n        },\n        {\n            \"key\": \"@Pincode\",\n            \"value\": \"\"\n        },\n        {\n            \"key\": \"@PR_ANNPREM\",\n            \"value\": \"0\"\n        },\n        {\n            \"key\": \"@PR_MI\",\n            \"value\": \"0\"\n        },\n        {\n            \"key\": \"@PR_SA\",\n            \"value\": \"250000.00\"\n        },\n        {\n            \"key\": \"@PR_SAMF\",\n            \"value\": \"1.25\"\n        },\n        {\n            \"key\": \"@PR_ModalPrem\",\n            \"value\": \"200000\"\n        },\n        {\n            \"key\": \"@FreezeDate\",\n            \"value\": \"01 Oct 2025\"\n        },\n        {\n            \"key\": \"@BUSINESS_TYPE_ID\",\n            \"value\": \"0\"\n        },\n        {\n            \"key\": \"@OCCUPATION_CLASS\",\n            \"value\": \"0\"\n        },\n        {\n            \"key\": \"@ISPDF\",\n            \"value\": \"1\"\n        },\n        {\n            \"key\": \"@AGE_PROOF\",\n            \"value\": \"1\"\n        },\n        {\n            \"key\": \"@PR_CHANNEL\",\n            \"value\": \"7\"\n        },\n        {\n            \"key\": \"@EMP_DISCOUNT\",\n            \"value\": \"0\"\n        },\n        {\n            \"key\": \"@ECS\",\n            \"value\": \"0\"\n        },\n        {\n            \"key\": \"@ANN_INCOME\",\n            \"value\": \"\"\n        },\n        {\n            \"key\": \"@FAM_ANN_INCOME\",\n            \"value\": \"5\"\n        },\n        {\n            \"key\": \"@FUNDSTRATEGYID\",\n            \"value\": \"0\"\n        }\n    ],\n    \"funds\": [],\n    \"riders\": [],\n    \"inputOptions\": [],\n    \"inputPartialWithdrawal\": []\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://biuatnew.reliancenipponlife.com:442/NSureServices.svc/GenerateBIAPI",
+          "protocol": "http",
+          "host": [
+            "biuatnew",
+            "reliancenipponlife",
+            "com"
+          ],
+          "port": "442",
+          "path": [
+            "NSureServices.svc",
+            "GenerateBIAPI"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PIVC",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"Added_By\": \"70732130\",\r\n    \"Application_Number\": \"MP444920\",\r\n    \"PIVC_Flag\": \"Selfie\",\r\n    \"Flow\": \"1\",\r\n    \"LA_Name\": \"prats\",\r\n    \"LA_DOB\": \"01-12-1976\",\r\n    \"LA_Mobileno\": \"7092466593\",\r\n    \"LA_AddressLine1\": \"andhwri\",\r\n    \"LA_AddressLine2\": \"east\",\r\n    \"LA_AddressLine3\": \"wsshf\",\r\n    \"LA_City\": \"bdjdnd\",\r\n    \"LA_EmailId\": \"vp@gmail.com\",\r\n    \"LA_Occupation\": \"Antique Dealer\",\r\n    \"LA_Pincode\": \"401101\",\r\n    \"LA_State\": \"ANDHRA PRADESH\",\r\n    \"Login_SAPCode\": \"70738327\",\r\n    \"PlanName\": \"Reliance Nippon Life GAIN Plan\",\r\n    \"QsLS_30_Medication_Drug_YN\": \"N\",\r\n    \"QsLS_32_MedicalAilgment_YN\": \"N\",\r\n    \"QsLS_33_SurgeryPlanned_YN\": \"N\",\r\n    \"Sumassured\": 352696,\r\n    \"PolicyTerm\": 15,\r\n    \"PremiumFrequency\": \"Half-yearly\",\r\n    \"PremiumPayingTerm\": \"10\",\r\n    \"Installmentpremium\": \"41800\",\r\n    \"Add_Param3\": \"0\",\r\n    \"Source_From\": \"SE\",\r\n    \"Total_InstPremium_ST\": \"41800\",\r\n    \"plancode\": \"180\",\r\n    \"Source\": \"TAB/Offline\",\r\n    \"Login_Mobile\": \"7092466593\",\r\n    \"Login_Name\": \"\",\r\n    \"PlanType\": \"ulip\",\r\n    \"Combo\": \"\",\r\n    \"Combo_PlanName\": \"\",\r\n    \"Combo_PremiumFrequency\": \"\",\r\n    \"Combo_PremiumPayingTerm\": \"\",\r\n    \"Combo_Total_InstPremium_ST\": \"\",\r\n    \"Channel\": \"DM\",\r\n    \"User_type\": \"DM-BM\",\r\n    \"Rider\": \"No CI Rider\",\r\n    \"Rider_Name\": \"No CI Rider\",\r\n    \"Rider_SA\": \"\",\r\n    \"LA_Proposer\": \"Different\",\r\n    \"PR_Mobileno\": \"1234567890\",\r\n    \"PR_DOB\": \"1961-04-10T00:00:00.000Z\",\r\n    \"IS_LA_PR_Identical\": \"N\",\r\n    \"Policy_Count\": \"0\",\r\n    \"Is_New_Script\": \"Y\",\r\n    \"\u201cdeferred_period\": \"7\",\r\n    \"Maturity_date\": \"01\\/2066\",\r\n    \"Life_Assured_Name\": \"Digambar Sambhaji Raut\",\r\n    \"Life_Assured_DOB\": \"02-11-2000\",\r\n    \"Life_Assured_EmailID\": \"rautdiggu1212121@gmail.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://pivcuat.indusindnipponlife.com/portal/api/CreatePIVCLink",
+          "protocol": "https",
+          "host": [
+            "pivcuat",
+            "indusindnipponlife",
+            "com"
+          ],
+          "path": [
+            "portal",
+            "api",
+            "CreatePIVCLink"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Instabiz Client Enquiry - Dedup",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"clientNumber\": \"97713909\",\r\n    \"action\": \"\",\r\n    \"securityNo\": \"\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/client/enquiry",
+          "protocol": "https",
+          "host": [
+            "extapiuat",
+            "indusindnipponlife",
+            "com"
+          ],
+          "path": [
+            "InstaBizServices",
+            "api",
+            "client",
+            "enquiry"
+          ]
+        },
+        "description": "Generated from cURL: curl --location --request POST 'https://extapiuat.indusindnipponlife.com/InstaBizServices/api/client/enquiry' \\\r\n\r\n--header 'Content-Type: application/json' \\\r\n\r\n--data-raw '{\r\n\r\n\"clientNumber\" : \"97713909\",\r\n\r\n\"action\" : \"\",\r\n\r\n\"securityNo\" : \"\"\r\n\r\n}'"
+      },
+      "response": []
+    },
+    {
+      "name": "Penny Drop",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"beneAccNo\": \"39614592730\",\r\n    \"beneIFSC\": \"SBIN0010446\",\r\n    \"custName\": \"Shikhar Rana\",\r\n    \"mobile\": \"8287868651\",\r\n    \"source\": \"SE\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://extapi.reliancenipponlife.com/ACCValidation/validate",
+          "protocol": "https",
+          "host": [
+            "extapi",
+            "reliancenipponlife",
+            "com"
+          ],
+          "path": [
+            "ACCValidation",
+            "validate"
+          ]
+        },
+        "description": "Generated from cURL: curl --location --request POST 'https://extapi.reliancenipponlife.com/ACCValidation/validate' \\\r\n\r\n--header 'Content-Type: application/json' \\\r\n\r\n--data-raw '{\r\n\r\n\"beneAccNo\": \"112345662222\",\r\n\r\n\"beneIFSC\": \"IFSC09893\",\r\n\r\n\"custName\":\"Vikas V\",\r\n\r\n\"mobile\": \"8104229849\",\r\n\r\n\"source\":\"SE\"\r\n\r\n}'"
+      },
+      "response": []
+    },
+    {
+      "name": "NSDLValidation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "EncryptedKey",
+            "value": "0XTRFSETJWQ8O5G75EH7X8VAMRFFCSW4",
+            "type": "text"
+          },
+          {
+            "key": "IV",
+            "value": "9GQn7zPDAeMa5QtLe21ggw==",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "HMAC oz/3K4E2zJ2saSjtl6dzXc8HTewyIF+BZhWDJqi1mws=",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "text/plain",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "P5rriC4sOQwcvA2Gr3MPpOVkM6OXj4oMQ8zH92m39RM09ve8r4d1idrqC6qMlh380cJb+VYtlPK3+YA5qW8vztzVwURraxoofdHP2/tYipM8ewilsgL/u/D+jsJ4YI/V",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/NSDLServices/NSDLValidation",
+          "protocol": "https",
+          "host": [
+            "extapiuat",
+            "indusindnipponlife",
+            "com"
+          ],
+          "path": [
+            "NSDLServices",
+            "NSDLValidation"
+          ]
+        },
+        "description": "Generated from cURL: curl --location 'https://extapi.reliancenipponlife.com/NSDLServices/NSDLValidation' \\--header 'EncryptedKey: <Base64-RSA-Encrypted-AES-Key>' \\\r\n--header 'IV: <Base64-IV>' \\\r\n--header 'Authorization: HMAC <token>' \\\r\n--header 'Content-Type: text/plain' \\\r\n--data '<Base64-AES-Encrypted-JSON>'"
+      },
+      "response": []
+    },
+    {
+      "name": "enachregistration/initiate",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"frequencydeduction\": \"YEAR\",\r\n    \"accountholdername\": \"NILESH NARAYAN WANI\",\r\n    \"amount\": \"39607\",\r\n    \"accountnumber\": \"\",\r\n    \"is_combinedregistration\": \"N\",\r\n    \"revokeable\": \"Y\",\r\n    \"mandateenddate\": \"27032055\",\r\n    \"mandatestartdate\": \"27032025\",\r\n    \"accounttype\": \"SA\",\r\n    \"pattern\": \"ONETIME\",\r\n    \"untilcancelled\": \"Y\",\r\n    \"emailid\": \"vaninilesh61@gmail.com\",\r\n    \"policyno\": \"TM522797\",\r\n    \"mobileno\": \"7798855693\",\r\n    \"aadharNo\": \"859414635229\",\r\n    \"payervpa\": \"\",\r\n    \"intent\": \"Y\",\r\n    \"authenticationmode\": \"UA\",\r\n    \"enach_amount\": \"39607.00\",\r\n    \"debittype\": \"F\",\r\n    \"pan\": \"\",\r\n    \"ifsc\": \"\",\r\n    \"bankcode\": \"\",\r\n    \"consumer\": \"EN01\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://extapiuat.reliancenipponlife.com/enachregistration/initiate",
+          "protocol": "https",
+          "host": [
+            "extapiuat",
+            "reliancenipponlife",
+            "com"
+          ],
+          "path": [
+            "enachregistration",
+            "initiate"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "enachregistration/vpavalidation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"vpa\": \"9096950158@ybl\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://extapiuat.reliancenipponlife.com/enachregistration/vpavalidation",
+          "protocol": "https",
+          "host": [
+            "extapiuat",
+            "reliancenipponlife",
+            "com"
+          ],
+          "path": [
+            "enachregistration",
+            "vpavalidation"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "proposal-fulfillment/drc",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "RNLIC10203040"
+          },
+          {
+            "key": "x-client-id",
+            "value": "22a0b4e5-940f-40a4-984d-6af1ac8e8c9e"
+          },
+          {
+            "key": "x-token",
+            "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJJZCI6IjcwMjc5MjM3IiwiZGV2aWNlSWQiOiIxMjM0NTY3ODk4NyJ9LCJpYXQiOjE3MzgxNTE0NjgsImV4cCI6MTczODE4MDI2OH0.h5i8jw8OaEhjnWZP0R2K57OQnIQaR1MpQPjSuOG3mPyrd8LVV4H2gDAYFHsdzWB9nioke2ON7MNyjkm0eefJLm5y8E8Ewu-8YB9xYRY0L2zuKxxkSTJBCXw5QGlIojoCRhP10QVeHCEo772Y2DN0c281MnL4EQZ1HyLj45BP8XVhvR8H7dwIXWn1BJzMr5ncBJiT3CST4GADsCzEP4CdKNuTiYqjn3-Fxix6CwzcIPePz6CBGJx65Zlxk_xVmWpnPh_RB1rLggAr7e9Y_gVnHP1855G3iCyt6UynJSdsxVpv-rANHh2w4ql8apkUSW5r6HEbdkLD0bq5xTZwFIHzPQ"
+          },
+          {
+            "key": "origin",
+            "value": "https://sa3dev.reliancenipponlife.com"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"applicationId\": \"TM133097\",\r\n  \"contract_No\": \"TM133097\",\r\n  \"risk_Commencement_Date\": \"\",\r\n  \"policy_Issue_Date\": \"\",\r\n  \"life_Assured_Client_ID\": \"\",\r\n  \"life_Assured_DOB\": \"1978-01-24\",\r\n  \"life_Assured_Age\": \"47\",\r\n  \"life_Assured_Age_Proof\": \"Army Identity Card\",\r\n  \"life_Assured_Gender\": \"Male\",\r\n  \"life_Assured_Annual_Income\": \"1500000\",\r\n  \"life_Assured_Occupation\": \"House Wife\",\r\n  \"life_Assured_Industry\": \"\",\r\n  \"life_Assured_Qualification\": \"Graduate\",\r\n  \"life_Assured_Marital_Status\": \"Single\",\r\n  \"life_Assured_City\": \"Mumbai\",\r\n  \"life_Assured_Pincode\": 400063,\r\n  \"life_Assured_State\": \"Maharashtra\",\r\n  \"life_Assured_Nationality\": \"India\",\r\n  \"life_Assured_Country\": \"India\",\r\n  \"life_Assured_ID_Proof\": \"UID (Aadhar)\",\r\n  \"life_Assured_Income_Proof\": \"\",\r\n  \"policy_Owner_Client_ID\": \"\",\r\n  \"policy_Owner_DOB\": \"1978-01-24\",\r\n  \"policy_Owner_Age\": \"47\",\r\n  \"policy_Owner_Age_Proof\": \"\",\r\n  \"policy_Owner_Gender\": \"Male\",\r\n  \"policy_Owner_Annual_Income\": \"1500000\",\r\n  \"policy_Owner_Occupation\": \"Accountant (Desk Job)\",\r\n  \"policy_Owner_Industry\": \"\",\r\n  \"policy_Owner_Qualification\": \"Graduate\",\r\n  \"policy_Owner_Marital_Status\": \"Single\",\r\n  \"policy_Owner_City\": \"Mumbai\",\r\n  \"policy_Owner_Pincode\": 400063,\r\n  \"policy_Owner_Country\": \"India\",\r\n  \"policy_Owner_Nationality\": \"India\",\r\n  \"policy_Owner_ID_Proof\": \"UID (Aadhar)\",\r\n  \"policy_Owner_Income_Proof\": \"\",\r\n  \"product_Code\": \"Reliance Nippon Life Super Suraksha Elite\",\r\n  \"product_Name\": \"Reliance Nippon Life Super Suraksha Elite\",\r\n  \"base_Plan_Sum_Assured\": \"15000000\",\r\n  \"annual_Premium\": 144032,\r\n  \"policy_Term\": 25,\r\n  \"premium_Payment_Term\": 25,\r\n  \"billing_Frequency\": \"Yearly\",\r\n  \"premium_Payment_Mode\": \"Electronic Cleaning System\",\r\n  \"sales_Channel\": \"\",\r\n  \"nominee_Relation\": \"Mother\",\r\n  \"zone_Location\": \"\",\r\n  \"branch_Location\": \"Maharashtra\",\r\n  \"online_Offline_Flag\": \"\",\r\n  \"smoker_Flag\": \"Non Smoker\",\r\n  \"advisor_Code\": \"22021414\",\r\n  \"agent_Type\": \"Shweta Rohil\",\r\n  \"agent_Class\": \"\",\r\n  \"agent_Code\": \"\",\r\n  \"line_of_Business\": \"\",\r\n  \"sum_Under_Consideration\": \"\",\r\n  \"Life_Assured_Name\": \"Umesh g\",\r\n  \"Life_Assured_Contact_No\": \"9920464044\",\r\n  \"Life_Assured_PAN_No\": \"AQUPK7625D\",\r\n  \"Life_Assured_Email_Id\": \"umesh.gharat@relianceada.com\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://sa3dev.reliancenipponlife.com/v1.0/nams/proposal-fulfillment/drc",
+          "protocol": "https",
+          "host": [
+            "sa3dev",
+            "reliancenipponlife",
+            "com"
+          ],
+          "path": [
+            "v1.0",
+            "nams",
+            "proposal-fulfillment",
+            "drc"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "document/save",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "EncryptedKey",
+            "value": "0XTRFSETJWQ8O5G75EH7X8VAMRFFCSW4"
+          },
+          {
+            "key": "IV",
+            "value": "9GQn7zPDAeMa5QtLe21ggw=="
+          },
+          {
+            "key": "Authorization",
+            "value": "HMAC oz/3K4E2zJ2saSjtl6dzXc8HTewyIF+BZhWDJqi1mws="
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "text/plain"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "78bbYOKb1CR+lmGL71pYWnF2on+DhYgNs0ErUb9ccKkFq9mu0yQgWic6GXJOXGxb3+QxD3OC8bi8jqG2C6ftDe+2lVhyKNC9IAJWpDPMpyPA4+/rblTLMHBmQqAgaXmP5lQXEPrWW/CoHuXa6w1ANIKteY2Ndg+RvIMnwActwdmjztlyfVXH7dkzc8yH5hT0RhV/tF0mdFY63uRPvtKih1cXlp+IBCZHnxCSqQyI1axipfHbQix/OEQcxR+DFBUqwHBIoe/hH6R1WytkESpuGJcv2TaneIxSyC46RRvmDHE=",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/document/save",
+          "protocol": "https",
+          "host": [
+            "extapiuat",
+            "indusindnipponlife",
+            "com"
+          ],
+          "path": [
+            "InstaBizServices",
+            "api",
+            "document",
+            "save"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getPolicyStatus",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "EncryptedKey",
+            "value": "0XTRFSETJWQ8O5G75EH7X8VAMRFFCSW4"
+          },
+          {
+            "key": "IV",
+            "value": "9GQn7zPDAeMa5QtLe21ggw=="
+          },
+          {
+            "key": "Authorization",
+            "value": "HMAC oz/3K4E2zJ2saSjtl6dzXc8HTewyIF+BZhWDJqi1mws="
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/policy-status/getPolicyStatus/6dRYLJc+l3bfPbGU7hXSzQ==",
+          "protocol": "https",
+          "host": [
+            "extapiuat",
+            "indusindnipponlife",
+            "com"
+          ],
+          "path": [
+            "InstaBizServices",
+            "api",
+            "policy-status",
+            "getPolicyStatus",
+            "6dRYLJc+l3bfPbGU7hXSzQ=="
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "application/save",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "EncryptedKey",
+            "value": "0XTRFSETJWQ8O5G75EH7X8VAMRFFCSW4"
+          },
+          {
+            "key": "IV",
+            "value": "9GQn7zPDAeMa5QtLe21ggw=="
+          },
+          {
+            "key": "Authorization",
+            "value": "HMAC oz/3K4E2zJ2saSjtl6dzXc8HTewyIF+BZhWDJqi1mws="
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "text/plain"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "VM3vSZzTVGQDHWs5GDDxqxW2eWgezXD3uDEa0YO/QojOaP/7pfpOAdWxFg8Gboci6htfiZ3uEouFuMFMqK3QNvmGQRekHw2AfRF52UJQmctE8pimInbGYqulvvKX0L0Myc+LUaMqXSsEKlNcoq7ZG4JoZRvdjcgpo7KqcUtTHQ73DSDS/5cgNPmGl3wvlcqTTQaLJ7CBBvG2rLzEqFcNmJbEvrRnEnxB7I3gFxLobNrA6srrbZD952rZQAqyDex2YvC3beblT3qQee+2aqkS6EbmSn7g2TNo686g5t1tMmU5BcE2kCN+gEvk8XfiMOLq1dFlFnmXVo3+w4H9M6fpkw3XrT0tNsArP48lAuMqg5MQk1um38upIhis51i1AhkUb93e82eb+DQzxYjaUOqM/wwWYpvWGyK6VJZrUj1lb2SP2RZzqV3R2SXKoMpTyQl5",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://extapiuat.indusindnipponlife.com/InstaBizServices/api/application/save",
+          "protocol": "https",
+          "host": [
+            "extapiuat",
+            "indusindnipponlife",
+            "com"
+          ],
+          "path": [
+            "InstaBizServices",
+            "api",
+            "application",
+            "save"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

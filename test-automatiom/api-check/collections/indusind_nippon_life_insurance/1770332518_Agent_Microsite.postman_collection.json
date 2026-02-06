@@ -1,0 +1,65 @@
+{
+  "info": {
+    "_postman_id": "78b321b0-95d9-453b-a5c4-ab693a6e8263",
+    "name": "Agent Microsite",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "47944953"
+  },
+  "item": [
+    {
+      "name": "nlms/push-leads - SE3",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "RNLIC10203040"
+          },
+          {
+            "key": "x-client-id",
+            "value": "22a0b4e5-940f-40a4-984d-6af1ac8e8c9e"
+          },
+          {
+            "key": "x-token",
+            "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJJZCI6IjkwNDQyMjIiLCJkZXZpY2VJZCI6IjEyMzQ1Njc4OTg3In0sImlhdCI6MTc2NzY5MTE4MCwiZXhwIjoxNzY3NzE5OTgwfQ.Xr_4adRibztl3kzJkx14IZrXmQ7nc7LefaR4NoefZTc9Gfmwcse-CvxlKuJngZ0_uS3aK5RKbUbkYN_b4eyeiJ6SPVlxtNFxgdWea4meiWDW_hO636bKhY0buS19T3909CH29PIM8MNlJyB6VN23VcNaHFpkjprOBB0e6OQVwj-znexpoOvs1LsS0n61Yv-TKOZhTYMshThbkYq_XXKrvlumqx2kZFwUq2wm1squOiKMZdBf5MQPAFROwRyUKfIbNnWv5fv3KC9eDKHCV9W2n8BfH7jOKhUYPio7in01Pbt5SuHPrWfO_W4K_agUgawWYvP2Ll-JYbCP10zTDtmeTQ"
+          },
+          {
+            "key": "origin",
+            "value": "https://karma.reliancenipponlife.com"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n   \"userId\": \"70647205\",\r\n   \"name\": \"Ravish Pandey\",\r\n   \"phoneNo\": \"9503740000\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://karma.reliancenipponlife.com/v1.0/nlms/push-leads",
+          "protocol": "https",
+          "host": [
+            "karma",
+            "reliancenipponlife",
+            "com"
+          ],
+          "path": [
+            "v1.0",
+            "nlms",
+            "push-leads"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

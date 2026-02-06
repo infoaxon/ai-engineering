@@ -18,9 +18,7 @@ storage: Storage = None
 
 
 def setup_routes(
-    _templates: Jinja2Templates,
-    _customer_manager: CustomerManager,
-    _storage: Storage
+    _templates: Jinja2Templates, _customer_manager: CustomerManager, _storage: Storage
 ) -> None:
     """Initialize route dependencies."""
     global templates, customer_manager, storage
@@ -43,6 +41,19 @@ async def root():
     return RedirectResponse(url="/dashboard")
 
 
+@router.get("/health")
+async def health_check():
+    """Health check endpoint for load balancers and monitoring.
+
+    Returns basic application health status.
+    """
+    return {
+        "status": "healthy",
+        "service": "api-health-check",
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+
+
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
     """Main dashboard with all customers overview."""
@@ -61,11 +72,19 @@ async def dashboard(request: Request):
 
         for env_key, env_config in config.environments.items():
             api_names = [api.name for api in env_config.apis]
-            statuses = await storage.get_environment_statuses(customer_id, env_key, api_names)
+            statuses = await storage.get_environment_statuses(
+                customer_id, env_key, api_names
+            )
 
-            healthy = sum(1 for s in statuses if s.current_status == HealthStatus.HEALTHY)
-            degraded = sum(1 for s in statuses if s.current_status == HealthStatus.DEGRADED)
-            unhealthy = sum(1 for s in statuses if s.current_status == HealthStatus.UNHEALTHY)
+            healthy = sum(
+                1 for s in statuses if s.current_status == HealthStatus.HEALTHY
+            )
+            degraded = sum(
+                1 for s in statuses if s.current_status == HealthStatus.DEGRADED
+            )
+            unhealthy = sum(
+                1 for s in statuses if s.current_status == HealthStatus.UNHEALTHY
+            )
 
             total_healthy += healthy
             total_degraded += degraded
@@ -87,7 +106,7 @@ async def dashboard(request: Request):
                 degraded_count=degraded,
                 unhealthy_count=unhealthy,
                 last_check=last_check,
-                apis=statuses
+                apis=statuses,
             )
             environments.append(env_status)
 
@@ -99,17 +118,13 @@ async def dashboard(request: Request):
             healthy_count=total_healthy,
             degraded_count=total_degraded,
             unhealthy_count=total_unhealthy,
-            environments=environments
+            environments=environments,
         )
         customers_status.append(customer_status)
 
     response = templates.TemplateResponse(
         "dashboard.html",
-        {
-            "request": request,
-            "customers": customers_status,
-            "now": datetime.utcnow()
-        }
+        {"request": request, "customers": customers_status, "now": datetime.utcnow()},
     )
     return no_cache_response(response)
 
@@ -121,7 +136,7 @@ async def customer_dashboard(request: Request, customer_id: str):
         return templates.TemplateResponse(
             "error.html",
             {"request": request, "message": f"Customer '{customer_id}' not found"},
-            status_code=404
+            status_code=404,
         )
 
     customer_config = customer_manager.customers[customer_id]
@@ -130,8 +145,11 @@ async def customer_dashboard(request: Request, customer_id: str):
     if not config:
         return templates.TemplateResponse(
             "error.html",
-            {"request": request, "message": f"Configuration not found for '{customer_id}'"},
-            status_code=404
+            {
+                "request": request,
+                "message": f"Configuration not found for '{customer_id}'",
+            },
+            status_code=404,
         )
 
     environments = []
@@ -141,11 +159,15 @@ async def customer_dashboard(request: Request, customer_id: str):
 
     for env_key, env_config in config.environments.items():
         api_names = [api.name for api in env_config.apis]
-        statuses = await storage.get_environment_statuses(customer_id, env_key, api_names)
+        statuses = await storage.get_environment_statuses(
+            customer_id, env_key, api_names
+        )
 
         healthy = sum(1 for s in statuses if s.current_status == HealthStatus.HEALTHY)
         degraded = sum(1 for s in statuses if s.current_status == HealthStatus.DEGRADED)
-        unhealthy = sum(1 for s in statuses if s.current_status == HealthStatus.UNHEALTHY)
+        unhealthy = sum(
+            1 for s in statuses if s.current_status == HealthStatus.UNHEALTHY
+        )
 
         total_healthy += healthy
         total_degraded += degraded
@@ -166,7 +188,7 @@ async def customer_dashboard(request: Request, customer_id: str):
             degraded_count=degraded,
             unhealthy_count=unhealthy,
             last_check=last_check,
-            apis=statuses
+            apis=statuses,
         )
         environments.append(env_status)
 
@@ -178,16 +200,12 @@ async def customer_dashboard(request: Request, customer_id: str):
         healthy_count=total_healthy,
         degraded_count=total_degraded,
         unhealthy_count=total_unhealthy,
-        environments=environments
+        environments=environments,
     )
 
     response = templates.TemplateResponse(
         "customer.html",
-        {
-            "request": request,
-            "customer": customer_status,
-            "now": datetime.utcnow()
-        }
+        {"request": request, "customer": customer_status, "now": datetime.utcnow()},
     )
     return no_cache_response(response)
 
@@ -199,7 +217,7 @@ async def environment_dashboard(request: Request, customer_id: str, env: str):
         return templates.TemplateResponse(
             "error.html",
             {"request": request, "message": f"Customer '{customer_id}' not found"},
-            status_code=404
+            status_code=404,
         )
 
     config = customer_manager.get_all_configs().get(customer_id)
@@ -207,7 +225,7 @@ async def environment_dashboard(request: Request, customer_id: str, env: str):
         return templates.TemplateResponse(
             "error.html",
             {"request": request, "message": f"Environment '{env}' not found"},
-            status_code=404
+            status_code=404,
         )
 
     customer_config = customer_manager.customers[customer_id]
@@ -236,7 +254,7 @@ async def environment_dashboard(request: Request, customer_id: str, env: str):
         degraded_count=degraded,
         unhealthy_count=unhealthy,
         last_check=last_check,
-        apis=statuses
+        apis=statuses,
     )
 
     response = templates.TemplateResponse(
@@ -248,8 +266,8 @@ async def environment_dashboard(request: Request, customer_id: str, env: str):
             "env": env_status,
             "api_configs": api_configs,
             "settings": config.settings,
-            "now": datetime.utcnow()
-        }
+            "now": datetime.utcnow(),
+        },
     )
     return no_cache_response(response)
 
@@ -264,14 +282,13 @@ async def api_status_all():
         if not config:
             continue
 
-        customer_data = {
-            "name": customer_config.name,
-            "environments": {}
-        }
+        customer_data = {"name": customer_config.name, "environments": {}}
 
         for env_key, env_config in config.environments.items():
             api_names = [api.name for api in env_config.apis]
-            statuses = await storage.get_environment_statuses(customer_id, env_key, api_names)
+            statuses = await storage.get_environment_statuses(
+                customer_id, env_key, api_names
+            )
 
             customer_data["environments"][env_key] = {
                 "name": env_config.name,
@@ -279,13 +296,15 @@ async def api_status_all():
                     {
                         "name": s.api_name,
                         "status": s.current_status.value,
-                        "last_check": s.last_check.isoformat() if s.last_check else None,
+                        "last_check": (
+                            s.last_check.isoformat() if s.last_check else None
+                        ),
                         "latency_ms": s.last_latency_ms,
                         "uptime_24h": s.uptime_24h,
-                        "last_error": s.last_error
+                        "last_error": s.last_error,
                     }
                     for s in statuses
-                ]
+                ],
             }
 
         result[customer_id] = customer_data
@@ -308,12 +327,14 @@ async def api_status_customer(customer_id: str):
     result = {
         "customer_id": customer_id,
         "name": customer_config.name,
-        "environments": {}
+        "environments": {},
     }
 
     for env_key, env_config in config.environments.items():
         api_names = [api.name for api in env_config.apis]
-        statuses = await storage.get_environment_statuses(customer_id, env_key, api_names)
+        statuses = await storage.get_environment_statuses(
+            customer_id, env_key, api_names
+        )
 
         result["environments"][env_key] = {
             "name": env_config.name,
@@ -324,10 +345,10 @@ async def api_status_customer(customer_id: str):
                     "last_check": s.last_check.isoformat() if s.last_check else None,
                     "latency_ms": s.last_latency_ms,
                     "uptime_24h": s.uptime_24h,
-                    "last_error": s.last_error
+                    "last_error": s.last_error,
                 }
                 for s in statuses
-            ]
+            ],
         }
 
     return result
@@ -358,10 +379,10 @@ async def api_status_environment(customer_id: str, env: str):
                 "last_check": s.last_check.isoformat() if s.last_check else None,
                 "latency_ms": s.last_latency_ms,
                 "uptime_24h": s.uptime_24h,
-                "last_error": s.last_error
+                "last_error": s.last_error,
             }
             for s in statuses
-        ]
+        ],
     }
 
 
