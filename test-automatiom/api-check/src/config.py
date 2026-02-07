@@ -1,9 +1,11 @@
 """Configuration loader for YAML files with environment variable support."""
+from __future__ import annotations
 
 import json
 import os
 import re
 from pathlib import Path
+from typing import Optional, Union
 
 import yaml
 
@@ -139,7 +141,7 @@ class CustomerManager:
         self.customers_config_path = customers_config_path
         self._customers: dict[str, CustomerConfig] = {}
         self._configs: dict[str, AppConfig] = {}
-        self._last_modified: float | None = None
+        self._last_modified: Optional[float] = None
 
     def load_customers(self) -> dict[str, CustomerConfig]:
         """Load customer configurations from YAML file."""
@@ -170,7 +172,7 @@ class CustomerManager:
         self._customers = customers
         return customers
 
-    def load_customer_config(self, customer_id: str) -> AppConfig | None:
+    def load_customer_config(self, customer_id: str) -> Optional[AppConfig]:
         """Load API configuration for a specific customer from their Postman collections."""
         if customer_id not in self._customers:
             self.load_customers()
@@ -249,8 +251,8 @@ class CustomerManager:
         name: str,
         description: str = "",
         postman_collection: str = "",
-        postman_collections: list[str] | None = None,
-        environments: list[str] | None = None,
+        postman_collections: Optional[list[str]] = None,
+        environments: Optional[list[str]] = None,
     ) -> bool:
         """Add a new customer to the configuration.
 
@@ -297,11 +299,11 @@ class CustomerManager:
     def update_customer(
         self,
         customer_id: str,
-        name: str | None = None,
-        description: str | None = None,
-        postman_collection: str | None = None,
-        postman_collections: list[str] | None = None,
-        environments: list[str] | None = None,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        postman_collection: Optional[str] = None,
+        postman_collections: Optional[list[str]] = None,
+        environments: Optional[list[str]] = None,
     ) -> bool:
         """Update an existing customer's configuration.
 
@@ -546,8 +548,8 @@ class ConfigManager:
 
     def __init__(self, config_path: str | Path):
         self.config_path = Path(config_path)
-        self._config: AppConfig | None = None
-        self._last_modified: float | None = None
+        self._config: Optional[AppConfig] = None
+        self._last_modified: Optional[float] = None
 
     @property
     def config(self) -> AppConfig:

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Automation Portal - InfoAxon</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .navbar {
+            background: rgba(0,0,0,0.3) !important;
+            backdrop-filter: blur(10px);
+        }
+        .app-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        .app-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .app-icon.health {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+        }
+        .app-icon.coming-soon {
+            background: linear-gradient(135deg, #636e72, #b2bec3);
+        }
+        .status-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+        .welcome-section {
+            padding: 4rem 0 2rem;
+        }
+        .footer {
+            background: rgba(0,0,0,0.2);
+            padding: 1rem 0;
+            margin-top: auto;
+        }
+        a.stretched-link {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-gear-wide-connected me-2"></i>
+                Test Automation Portal
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="nav-link">
+                    <i class="bi bi-person-circle me-1"></i>
+                    <span id="username">Welcome</span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container flex-grow-1">
+        <div class="welcome-section text-center">
+            <h1 class="display-5 fw-bold mb-3">Test Automation Hub</h1>
+            <p class="lead text-light opacity-75">
+                Monitor, test, and validate your applications from a single dashboard
+            </p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <!-- API Health Check -->
+            <div class="col-md-6 col-lg-4">
+                <div class="app-card p-4 position-relative">
+                    <span class="badge bg-success status-badge">Active</span>
+                    <div class="app-icon health">
+                        <i class="bi bi-heart-pulse"></i>
+                    </div>
+                    <h4>API Health Check</h4>
+                    <p class="text-light opacity-75 mb-3">
+                        Monitor API endpoints health status across environments.
+                        Track response times, uptime, and get alerts for failures.
+                    </p>
+                    <ul class="list-unstyled small text-light opacity-75 mb-3">
+                        <li><i class="bi bi-check-circle me-2 text-success"></i>Real-time monitoring</li>
+                        <li><i class="bi bi-check-circle me-2 text-success"></i>Multi-environment support</li>
+                        <li><i class="bi bi-check-circle me-2 text-success"></i>Postman collection import</li>
+                    </ul>
+                    <a href="/dashboard" class="btn btn-outline-light stretched-link">
+                        <i class="bi bi-arrow-right-circle me-2"></i>Open Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <!-- Test Data Generator - Coming Soon -->
+            <div class="col-md-6 col-lg-4">
+                <div class="app-card p-4 position-relative">
+                    <span class="badge bg-secondary status-badge">Coming Soon</span>
+                    <div class="app-icon coming-soon">
+                        <i class="bi bi-database"></i>
+                    </div>
+                    <h4>Test Data Generator</h4>
+                    <p class="text-light opacity-75 mb-3">
+                        Generate realistic test data for your applications.
+                        AI-powered data generation with custom schemas.
+                    </p>
+                    <ul class="list-unstyled small text-light opacity-50 mb-3">
+                        <li><i class="bi bi-clock me-2"></i>AI-powered generation</li>
+                        <li><i class="bi bi-clock me-2"></i>Custom data schemas</li>
+                        <li><i class="bi bi-clock me-2"></i>Export to multiple formats</li>
+                    </ul>
+                    <button class="btn btn-outline-secondary" disabled>
+                        <i class="bi bi-hourglass-split me-2"></i>Coming Soon
+                    </button>
+                </div>
+            </div>
+
+            <!-- Performance Testing - Coming Soon -->
+            <div class="col-md-6 col-lg-4">
+                <div class="app-card p-4 position-relative">
+                    <span class="badge bg-secondary status-badge">Coming Soon</span>
+                    <div class="app-icon coming-soon">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <h4>Performance Testing</h4>
+                    <p class="text-light opacity-75 mb-3">
+                        Load test your APIs and applications.
+                        Measure throughput, latency, and identify bottlenecks.
+                    </p>
+                    <ul class="list-unstyled small text-light opacity-50 mb-3">
+                        <li><i class="bi bi-clock me-2"></i>Load testing</li>
+                        <li><i class="bi bi-clock me-2"></i>Stress testing</li>
+                        <li><i class="bi bi-clock me-2"></i>Performance reports</li>
+                    </ul>
+                    <button class="btn btn-outline-secondary" disabled>
+                        <i class="bi bi-hourglass-split me-2"></i>Coming Soon
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer text-center">
+        <div class="container">
+            <small class="text-light opacity-50">
+                &copy; 2026 InfoAxon Technologies. Test Automation Portal v1.0
+            </small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

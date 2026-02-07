@@ -1,4 +1,5 @@
 """FastAPI application entry point."""
+from __future__ import annotations
 
 import logging
 import os
@@ -6,6 +7,7 @@ import sys
 from contextlib import asynccontextmanager
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
+from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -44,7 +46,7 @@ def setup_logging() -> logging.Logger:
 
 
 logger = setup_logging()
-scheduler: HealthCheckScheduler | None = None
+scheduler: Optional[HealthCheckScheduler] = None
 
 
 def create_app() -> FastAPI:

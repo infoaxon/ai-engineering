@@ -1,0 +1,31 @@
+[Unit]
+Description=API Health Check Application
+After=network.target
+
+[Service]
+Type=simple
+User=shubham.nagar
+Group=shubham.nagar
+WorkingDirectory=/home/shubham.nagar/ai-projects/api-health
+Environment="PATH=/home/shubham.nagar/ai-projects/api-health/venv/bin:/usr/bin"
+Environment="ADMIN_USERNAME=admin"
+Environment="ADMIN_PASSWORD=admin123"
+Environment="LOG_LEVEL=INFO"
+Environment="CHECK_INTERVAL_MINUTES=5"
+
+# Application startup
+ExecStart=/home/shubham.nagar/ai-projects/api-health/venv/bin/uvicorn src.main:app \
+    --host 127.0.0.1 \
+    --port 8081
+
+# Restart policy
+Restart=always
+RestartSec=5
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=api-health-check
+
+[Install]
+WantedBy=multi-user.target

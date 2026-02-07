@@ -1,8 +1,9 @@
 """Pydantic models for API configuration and health check results."""
+from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -43,13 +44,13 @@ class APIConfig(BaseModel):
     url: str
     method: HTTPMethod = HTTPMethod.GET
     expected_status: int = 200
-    expected_response: dict[str, Any] | None = None
-    latency_threshold_ms: int | None = None
-    headers: dict[str, str] | None = None
-    body: dict[str, Any] | None = None
-    raw_body: str | None = None  # For XML/raw content
-    content_type: str | None = None  # Content-Type header value
-    timeout_seconds: int | None = None
+    expected_response: Optional[dict[str, Any]] = None
+    latency_threshold_ms: Optional[int] = None
+    headers: Optional[dict[str, str]] = None
+    body: Optional[dict[str, Any]] = None
+    raw_body: Optional[str] = None  # For XML/raw content
+    content_type: Optional[str] = None  # Content-Type header value
+    timeout_seconds: Optional[int] = None
     # Error field validation - check response body instead of status code
     check_error_field: bool = False
     error_field: str = "ErrorMessages"  # Field to check for errors in response
@@ -94,7 +95,7 @@ class CustomerCreateRequest(BaseModel):
 
     name: str
     description: str = ""
-    customer_id: str | None = None
+    customer_id: Optional[str] = None
     environments: list[str] = Field(
         default_factory=lambda: ["dev", "sit", "uat", "production"]
     )
@@ -125,9 +126,9 @@ class HealthCheckResult(BaseModel):
     environment: str
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     status: HealthStatus
-    status_code: int | None = None
-    latency_ms: float | None = None
-    error_message: str | None = None
+    status_code: Optional[int] = None
+    latency_ms: Optional[float] = None
+    error_message: Optional[str] = None
     response_valid: bool = True
 
 
@@ -138,10 +139,10 @@ class APIStatus(BaseModel):
     api_name: str
     environment: str
     current_status: HealthStatus
-    last_check: datetime | None = None
-    last_latency_ms: float | None = None
-    last_error: str | None = None
-    uptime_24h: float | None = None
+    last_check: Optional[datetime] = None
+    last_latency_ms: Optional[float] = None
+    last_error: Optional[str] = None
+    uptime_24h: Optional[float] = None
     check_count_24h: int = 0
 
 
@@ -155,7 +156,7 @@ class EnvironmentStatus(BaseModel):
     healthy_count: int
     degraded_count: int
     unhealthy_count: int
-    last_check: datetime | None = None
+    last_check: Optional[datetime] = None
     apis: list[APIStatus] = Field(default_factory=list)
 
 

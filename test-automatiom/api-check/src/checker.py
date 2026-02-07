@@ -1,7 +1,9 @@
 """Health check logic for API endpoints."""
+from __future__ import annotations
 
 import time
 from datetime import datetime
+from typing import Optional, Tuple, Union
 
 import httpx
 
@@ -24,7 +26,7 @@ def is_error_value_empty(value) -> bool:
     return False
 
 
-def find_error_field(data: dict | list, field_name: str) -> tuple[bool, str | None]:
+def find_error_field(data: Union[dict, list], field_name: str) -> Tuple[bool, Optional[str]]:
     """
     Recursively search for error field in response.
     Returns (has_errors, error_message).

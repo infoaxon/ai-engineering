@@ -1,8 +1,10 @@
 """SQLite storage for health check results."""
+from __future__ import annotations
 
 import aiosqlite
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Optional, Union
 
 from .models import HealthCheckResult, HealthStatus, APIStatus
 
@@ -10,7 +12,7 @@ from .models import HealthCheckResult, HealthStatus, APIStatus
 class Storage:
     """SQLite storage for health check history."""
 
-    def __init__(self, db_path: str | Path = "health_checks.db"):
+    def __init__(self, db_path: Union[str, Path] = "health_checks.db"):
         self.db_path = Path(db_path)
         self._initialized = False
 
@@ -111,7 +113,7 @@ class Storage:
 
     async def get_latest_status(
         self, customer_id: str, environment: str, api_name: str
-    ) -> HealthCheckResult | None:
+    ) -> Optional[HealthCheckResult]:
         """Get the most recent health check result for an API."""
         await self.initialize()
 
