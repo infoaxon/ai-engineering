@@ -1,4 +1,5 @@
 """Configuration loader for YAML files with environment variable support."""
+
 from __future__ import annotations
 
 import json
@@ -452,13 +453,15 @@ class CustomerManager:
             if collection_path.exists():
                 apis = parse_postman_collection(collection_path)
                 stat = collection_path.stat()
-                collections.append({
-                    "filename": collection_path.name,
-                    "path": collection_rel_path,
-                    "api_count": len(apis),
-                    "modified_date": stat.st_mtime,
-                    "size_bytes": stat.st_size,
-                })
+                collections.append(
+                    {
+                        "filename": collection_path.name,
+                        "path": collection_rel_path,
+                        "api_count": len(apis),
+                        "modified_date": stat.st_mtime,
+                        "size_bytes": stat.st_size,
+                    }
+                )
 
         return collections
 

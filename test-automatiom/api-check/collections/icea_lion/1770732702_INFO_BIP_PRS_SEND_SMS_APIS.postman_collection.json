@@ -1,0 +1,185 @@
+{
+  "info": {
+    "_postman_id": "a2fdb0ec-8fe3-4f0c-9426-5833b672030c",
+    "name": "INFO BIP PRS SEND SMS APIS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "21461722"
+  },
+  "item": [
+    {
+      "name": "Real demo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "authorization",
+            "value": "App aa9a1924e62f8bc84ca79a47fea602d5-5fce0904-b54b-4fa5-8fad-5bf139f8a2f2",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"messages\": [\r\n        {\r\n            \"sender\": \"ICEA LION\",\r\n            \"destinations\": [\r\n                {\r\n                    \"to\": \"254711187760\"\r\n                }\r\n            ],\r\n            \"content\": {\r\n                \"text\": \"Test sms from ICEA LION.\"\r\n            }\r\n        }\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://1zk61.api.infobip.com/sms/3/messages",
+          "protocol": "https",
+          "host": [
+            "1zk61",
+            "api",
+            "infobip",
+            "com"
+          ],
+          "path": [
+            "sms",
+            "3",
+            "messages"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Real demo",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "authorization",
+                "value": "App aa4955970ac2dbaebbd2dfa36c035f9a-154ebcd3-62dc-4a33-94f9-ccfbbba6a2e0",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"messages\": [\r\n        {\r\n            \"from\": \"ICEA LION\",\r\n            \"destinations\": [\r\n                {\r\n                    \"to\": \"254712577777\"\r\n                }\r\n            ],\r\n            \"text\": \"Test message Agile 1\"\r\n        }\r\n    ]\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://1zk61.api.infobip.com/sms/2/text/advanced",
+              "protocol": "https",
+              "host": [
+                "1zk61",
+                "api",
+                "infobip",
+                "com"
+              ],
+              "path": [
+                "sms",
+                "2",
+                "text",
+                "advanced"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "vary",
+              "value": "Origin"
+            },
+            {
+              "key": "vary",
+              "value": "Access-Control-Request-Method"
+            },
+            {
+              "key": "vary",
+              "value": "Access-Control-Request-Headers"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json;charset=UTF-8"
+            },
+            {
+              "key": "content-length",
+              "value": "198"
+            },
+            {
+              "key": "x-http2-stream-id",
+              "value": "2191"
+            },
+            {
+              "key": "server",
+              "value": "SMS API"
+            },
+            {
+              "key": "x-request-id",
+              "value": "1751373922141331830"
+            },
+            {
+              "key": "strict-transport-security",
+              "value": "max-age=31536000; includeSubDomains; preload;"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n    \"messages\": [\n        {\n            \"messageId\": \"4513739221644335752900\",\n            \"status\": {\n                \"description\": \"Message sent to next instance\",\n                \"groupId\": 1,\n                \"groupName\": \"PENDING\",\n                \"id\": 26,\n                \"name\": \"PENDING_ACCEPTED\"\n            },\n            \"to\": \"254712577777\"\n        }\n    ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Real demo Copy",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "authorization",
+            "value": "App c7c0d407564011d5c6f26f38a04b1899-fc1c3c3b-62a4-492a-9941-c2108d31ec6c",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://1zk61.api.infobip.com/sms/3/reports?messageId=17587066027657950402281",
+          "protocol": "https",
+          "host": [
+            "1zk61",
+            "api",
+            "infobip",
+            "com"
+          ],
+          "path": [
+            "sms",
+            "3",
+            "reports"
+          ],
+          "query": [
+            {
+              "key": "messageId",
+              "value": "17587066027657950402281"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

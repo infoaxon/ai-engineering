@@ -1,4 +1,5 @@
 """SQLite storage for health check results."""
+
 from __future__ import annotations
 
 import aiosqlite

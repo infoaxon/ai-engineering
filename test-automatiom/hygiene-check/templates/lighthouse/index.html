@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+{% block title %}Lighthouse Audit - Hygiene Check{% endblock %}
+
+{% block extra_css %}
+<style>
+    .gauge-wrap {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        display: inline-block;
+    }
+    .gauge-wrap canvas {
+        display: block;
+    }
+    .gauge-center-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.6rem;
+        font-weight: 700;
+        line-height: 1;
+        pointer-events: none;
+    }
+    .gauge-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6c757d;
+        margin-top: 0.4rem;
+        text-align: center;
+    }
+    .audit-row:hover {
+        background-color: #f8f9fa;
+    }
+    .recent-run-item {
+        border-left: 3px solid transparent;
+        transition: border-color 0.2s, background-color 0.2s;
+    }
+    .recent-run-item:hover {
+        border-left-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    .recent-run-item.active-run {
+        border-left-color: #0d6efd;
+        background-color: #e7f1ff;
+    }
+    .score-chip {
+        display: inline-block;
+        width: 2.2rem;
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.75rem;
+        padding: 0.15em 0.3em;
+        border-radius: 0.25rem;
+    }
+    .cat-badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .form-check-input:checked { background-color: #212529; border-color: #212529; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h4 class="mb-0">
+            <i class="bi bi-speedometer me-2 text-primary"></i>Lighthouse Audit
+        </h4>
+        <p class="text-muted mb-0 mt-1 small">
+            Run Google Lighthouse against any URL and inspect performance, accessibility, best-practices, and SEO scores.
+        </p>
+    </div>
+    <div class="col-auto">
+        <a href="/lighthouse/trends" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-graph-up me-1"></i>Score Trends
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- ===== Main Content ===== -->
+    <div class="col-lg-9">
+
+        <!-- Run Form -->
+        <div class="card env-card mb-4">
+            <div class="card-header bg-white border-bottom d-flex align-items-center">
+                <i class="bi bi-play-circle me-2 text-primary"></i>
+                <h6 class="mb-0">Run Lighthouse Audit</h6>
+            </div>
+            <div class="card-body">
+                <form id="lighthouseForm" class="row g-3" onsubmit="return submitLighthouse(event)">
+
+                    <!-- URL -->
+                    <div class="col-12">
+                        <label for="urlInput" class="form-label fw-semibold">Target URL</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+                            <input
+                                type="url"
+                                class="form-control"
+                                id="urlInput"
+                                name="url"
+                                placeholder="https://example.com/page"
+                                value="{{ run.target_url if run else '' }}"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Site selector -->
+                    <div class="col-md-4">
+                        <label for="siteSelect" class="form-label fw-semibold">Site</label>
+                        <select class="form-select" id="siteSelect" name="site_id">
+                            <option value="default">-- Ad-hoc --</option>
+                            {% for site in sites %}
+                            <option value="{{ site.site_id }}" {% if run and run.site_id == site.site_id %}selected{% endif %}>
+                                {{ site.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Environment -->
+                    <div class="col-md-3">
+                        <label for="envSelect" class="form-label fw-semibold">Environment</label>
+                        <select class="form-select" id="envSelect" name="environment">
+                            <option value="production">-- Production --</option>
+                            <option value="dev"  {% if run and run.environment == 'dev'  %}selected{% endif %}>DEV</option>
+                            <option value="sit"  {% if run and run.environment == 'sit'  %}selected{% endif %}>SIT</option>
+                            <option value="uat"  {% if run and run.environment == 'uat'  %}selected{% endif %}>UAT</option>
+                            <option value="prod" {% if run and run.environment == 'prod' %}selected{% endif %}>PROD</option>
+                        </select>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100" id="lhSubmitBtn">
+                            <i class="bi bi-play-fill me-1"></i>Audit
+                        </button>
+                    </div>
+
+                    <!-- Categories -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Categories</label>
+                        <div class="d-flex flex-wrap gap-3">
+                            {% set selected_cats = ['seo', 'accessibility', 'best-practices', 'performance'] %}
+                            {% for cat, label in [('performance', 'Performance'), ('accessibility', 'Accessibility'), ('best-practices', 'Best Practices'), ('seo', 'SEO')] %}
+                            <div class="form-check">
+                                <input
+                                    class="form-check-input cat-check"
+                                    type="checkbox"
+                                    name="categories"
+                                    value="{{ cat }}"
+                                    id="cat_{{ cat }}"
+                                    {% if cat in selected_cats %}checked{% endif %}
+                                >
+                                <label class="form-check-label small fw-semibold" for="cat_{{ cat }}">{{ label }}</label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- Live Log Console -->
+        <div id="liveLogConsole"></div>
+
+        {% if run %}
+        <!-- Run Meta Card -->
+        <div class="card env-card mb-4">
+            <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-clipboard-data me-2 text-primary"></i>
+                    <h6 class="mb-0">Audit Results</h6>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary">Run #{{ run.id }}</span>
+                    {% if run.status.value == 'completed' %}
+                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Completed</span>
+                    {% elif run.status.value == 'running' %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Running</span>
+                    {% else %}
+                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Failed</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="text-muted small mb-2">
+                    <i class="bi bi-link-45deg me-1"></i>
+                    <a href="{{ run.target_url }}" target="_blank" class="text-decoration-none text-truncate d-inline-block" style="max-width:500px; vertical-align:middle;">
+                        {{ run.target_url }}
+                    </a>
+                </div>
+                <div class="text-muted small">
+                    <i class="bi bi-tag me-1"></i>
+                    <span class="badge bg-dark">{{ run.environment | upper }}</span>
+                    <span class="badge bg-secondary ms-1">{{ run.site_id }}</span>
+                    <i class="bi bi-clock ms-2 me-1"></i>
+                    <span class="utc-time" data-utc="{{ run.started_at.isoformat() }}">{{ run.started_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                {% if run.error_message %}
+                <div class="alert alert-danger mt-3 mb-0 py-2">
+                    <i class="bi bi-exclamation-triangle me-2"></i>{{ run.error_message }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if scores %}
+        <!-- Score Gauges -->
+        <div class="card env-card mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0"><i class="bi bi-speedometer2 me-2 text-primary"></i>Scores</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap justify-content-around gap-4 py-2">
+                    {% set s = scores[0] %}
+
+                    <!-- Performance -->
+                    <div class="text-center">
+                        <div class="gauge-wrap mx-auto">
+                            <canvas id="gaugePerformance" width="150" height="150"></canvas>
+                            <div class="gauge-center-label
+                                {% if s.performance is not none and s.performance >= 90 %}text-success
+                                {% elif s.performance is not none and s.performance >= 50 %}text-warning
+                                {% elif s.performance is not none %}text-danger
+                                {% else %}text-muted{% endif %}">
+                                {% if s.performance is not none %}{{ (s.performance * 100) | round | int }}{% else %}--{% endif %}
+                            </div>
+                        </div>
+                        <div class="gauge-title">Performance</div>
+                    </div>
+
+                    <!-- Accessibility -->
+                    <div class="text-center">
+                        <div class="gauge-wrap mx-auto">
+                            <canvas id="gaugeAccessibility" width="150" height="150"></canvas>
+                            <div class="gauge-center-label
+                                {% if s.accessibility is not none and s.accessibility >= 0.9 %}text-success
+                                {% elif s.accessibility is not none and s.accessibility >= 0.5 %}text-warning
+                                {% elif s.accessibility is not none %}text-danger
+                                {% else %}text-muted{% endif %}">
+                                {% if s.accessibility is not none %}{{ (s.accessibility * 100) | round | int }}{% else %}--{% endif %}
+                            </div>
+                        </div>
+                        <div class="gauge-title">Accessibility</div>
+                    </div>
+
+                    <!-- Best Practices -->
+                    <div class="text-center">
+                        <div class="gauge-wrap mx-auto">
+                            <canvas id="gaugeBestPractices" width="150" height="150"></canvas>
+                            <div class="gauge-center-label
+                                {% if s.best_practices is not none and s.best_practices >= 0.9 %}text-success
+                                {% elif s.best_practices is not none and s.best_practices >= 0.5 %}text-warning
+                                {% elif s.best_practices is not none %}text-danger
+                                {% else %}text-muted{% endif %}">
+                                {% if s.best_practices is not none %}{{ (s.best_practices * 100) | round | int }}{% else %}--{% endif %}
+                            </div>
+                        </div>
+                        <div class="gauge-title">Best Practices</div>
+                    </div>
+
+                    <!-- SEO -->
+                    <div class="text-center">
+                        <div class="gauge-wrap mx-auto">
+                            <canvas id="gaugeSeo" width="150" height="150"></canvas>
+                            <div class="gauge-center-label
+                                {% if s.seo is not none and s.seo >= 0.9 %}text-success
+                                {% elif s.seo is not none and s.seo >= 0.5 %}text-warning
+                                {% elif s.seo is not none %}text-danger
+                                {% else %}text-muted{% endif %}">
+                                {% if s.seo is not none %}{{ (s.seo * 100) | round | int }}{% else %}--{% endif %}
+                            </div>
+                        </div>
+                        <div class="gauge-title">SEO</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if audits %}
+        <!-- Failing Audits Table -->
+        <div class="card env-card mb-4">
+            <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">
+                    <i class="bi bi-list-check me-2 text-primary"></i>Failing Audits
+                    <span class="badge bg-secondary ms-1">{{ audits | selectattr('score', 'ne', None) | selectattr('score', 'lt', 1) | list | length }}</span>
+                </h6>
+                <div>
+                    <input
+                        type="search"
+                        class="form-control form-control-sm"
+                        id="auditSearch"
+                        placeholder="Filter audits..."
+                        style="width: 200px;"
+                    >
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm mb-0" id="auditsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Audit</th>
+                                <th>Category</th>
+                                <th>Score</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for audit in audits %}
+                            {% if audit.score is none or audit.score < 1 %}
+                            <tr class="audit-row">
+                                <td class="ps-3 small fw-semibold">{{ audit.title }}</td>
+                                <td>
+                                    <span class="badge cat-badge
+                                        {% if audit.category == 'performance' %}bg-primary
+                                        {% elif audit.category == 'accessibility' %}bg-info text-dark
+                                        {% elif audit.category == 'best-practices' %}bg-secondary
+                                        {% elif audit.category == 'seo' %}bg-success
+                                        {% else %}bg-dark{% endif %}">
+                                        {{ audit.category | replace('-', ' ') | title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if audit.score is not none %}
+                                    {% set pct = (audit.score * 100) | round | int %}
+                                    <span class="score-chip
+                                        {% if pct >= 90 %}bg-success text-white
+                                        {% elif pct >= 50 %}bg-warning text-dark
+                                        {% else %}bg-danger text-white{% endif %}">
+                                        {{ pct }}
+                                    </span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">n/a</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">{{ audit.description | truncate(140) }}</td>
+                            </tr>
+                            {% endif %}
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-success py-4">
+                                    <i class="bi bi-check-circle me-2"></i>All audits passed.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty state -->
+        <div class="card env-card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-speedometer text-muted" style="font-size: 3rem;"></i>
+                <h5 class="mt-3 text-muted">No Audit Run Selected</h5>
+                <p class="text-muted mb-0">
+                    Enter a URL above and click <strong>Audit</strong> to start a new run,<br>
+                    or select a recent run from the sidebar.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+    </div><!-- /col-lg-9 -->
+
+    <!-- ===== Sidebar: Recent Runs ===== -->
+    <div class="col-lg-3">
+        <div class="card env-card">
+            <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">
+                    <i class="bi bi-clock-history me-2 text-primary"></i>Recent Runs
+                </h6>
+                <a href="/lighthouse/trends" class="btn btn-outline-secondary btn-sm py-0 px-2">
+                    Trends
+                </a>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for r in recent_runs %}
+                <a href="/lighthouse/?run_id={{ r.id }}"
+                   class="list-group-item list-group-item-action recent-run-item px-3 py-2 {% if run and run.id == r.id %}active-run{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1 me-2" style="min-width: 0;">
+                            <div class="small fw-semibold text-truncate" title="{{ r.target_url }}">
+                                {{ r.target_url | replace('https://', '') | replace('http://', '') }}
+                            </div>
+                            <div class="d-flex align-items-center gap-1 mt-1 flex-wrap">
+                                <span class="badge bg-dark" style="font-size: 0.65rem;">{{ r.environment | upper }}</span>
+                                {% if r.status.value == 'completed' %}
+                                <span class="status-indicator healthy" style="width: 8px; height: 8px;"></span>
+                                {% elif r.status.value == 'running' %}
+                                <span class="status-indicator degraded" style="width: 8px; height: 8px;"></span>
+                                {% else %}
+                                <span class="status-indicator unhealthy" style="width: 8px; height: 8px;"></span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            {% if r.score is not none %}
+                            <span class="badge {% if r.score >= 80 %}bg-success{% elif r.score >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}" style="font-size: 0.7rem;">
+                                {{ r.score | round(0) | int }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary" style="font-size: 0.7rem;">--</span>
+                            {% endif %}
+                            <div class="text-muted mt-1" style="font-size: 0.65rem;">
+                                <span class="utc-time" data-utc="{{ r.started_at.isoformat() }}">{{ r.started_at.strftime('%m/%d %H:%M') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% else %}
+                <div class="list-group-item text-muted text-center py-4 small">
+                    No recent runs yet.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div><!-- /col-lg-3 -->
+
+</div><!-- /row -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function submitLighthouse(e) {
+    e.preventDefault();
+    const url = document.getElementById('urlInput').value;
+    const siteId = document.getElementById('siteSelect').value;
+    const env = document.getElementById('envSelect').value;
+    const btn = document.getElementById('lhSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Starting...';
+    runCheckWithLiveLog({
+        apiUrl: '/api/lighthouse/run',
+        payload: { url: url, site_id: siteId, environment: env },
+        containerId: 'liveLogConsole',
+        redirectBase: '/lighthouse/',
+    });
+    return false;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // ---- Helper: draw a doughnut gauge ----
+    function drawGauge(canvasId, value, color) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+        const v = Math.min(Math.max(value || 0, 0), 100);
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [v, 100 - v],
+                    backgroundColor: [color, '#e9ecef'],
+                    borderWidth: 0,
+                    circumference: 270,
+                    rotation: 225,
+                }]
+            },
+            options: {
+                cutout: '78%',
+                responsive: false,
+                animation: { duration: 600 },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+    }
+
+    function scoreColor(v) {
+        if (v >= 90) return '#198754';
+        if (v >= 50) return '#ffc107';
+        return '#dc3545';
+    }
+
+    {% if run and scores %}
+    {% set s = scores[0] %}
+    const perf  = {{ (s.performance  * 100) | round | int if s.performance  is not none else 'null' }};
+    const a11y  = {{ (s.accessibility * 100) | round | int if s.accessibility is not none else 'null' }};
+    const bp    = {{ (s.best_practices * 100) | round | int if s.best_practices is not none else 'null' }};
+    const seo   = {{ (s.seo * 100) | round | int if s.seo is not none else 'null' }};
+
+    if (perf !== null) drawGauge('gaugePerformance',  perf,  scoreColor(perf));
+    if (a11y !== null) drawGauge('gaugeAccessibility', a11y,  scoreColor(a11y));
+    if (bp   !== null) drawGauge('gaugeBestPractices', bp,    scoreColor(bp));
+    if (seo  !== null) drawGauge('gaugeSeo',           seo,   scoreColor(seo));
+    {% endif %}
+
+    // ---- Audit search filter ----
+    const auditSearch = document.getElementById('auditSearch');
+    if (auditSearch) {
+        auditSearch.addEventListener('input', () => {
+            const q = auditSearch.value.toLowerCase();
+            document.querySelectorAll('#auditsTable tbody tr.audit-row').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        });
+    }
+
+});
+</script>
+{% endblock %}

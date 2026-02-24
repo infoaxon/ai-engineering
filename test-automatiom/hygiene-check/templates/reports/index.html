@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+{% block title %}Reports - Hygiene Check{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-tab {
+        border-radius: 0.4rem;
+        font-size: 0.82rem;
+        font-weight: 500;
+        padding: 0.35em 0.85em;
+        transition: background-color 0.15s, color 0.15s;
+        text-decoration: none;
+        color: #495057;
+        border: 1px solid #dee2e6;
+        background: #fff;
+        white-space: nowrap;
+    }
+    .filter-tab:hover {
+        background-color: #e9ecef;
+        color: #212529;
+        text-decoration: none;
+    }
+    .filter-tab.active {
+        background-color: #212529;
+        color: #fff;
+        border-color: #212529;
+    }
+    .type-badge {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .run-row:hover {
+        background-color: #f8f9fa;
+    }
+    .run-url {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .count-bubble {
+        font-size: 0.7rem;
+        min-width: 1.4rem;
+        text-align: center;
+        border-radius: 1rem;
+        padding: 0.1em 0.4em;
+        background-color: #e9ecef;
+        color: #495057;
+        font-weight: 600;
+        margin-left: 0.3rem;
+    }
+    .count-bubble.active {
+        background-color: #495057;
+        color: #fff;
+    }
+    .search-input-wrap {
+        max-width: 280px;
+    }
+    .empty-state-icon {
+        font-size: 3rem;
+    }
+
+    /* Type-specific badge colors */
+    .type-html_validation  { background-color: #0d6efd; color: #fff; }
+    .type-seo_audit        { background-color: #198754; color: #fff; }
+    .type-lighthouse       { background-color: #6f42c1; color: #fff; }
+    .type-broken_links     { background-color: #dc3545; color: #fff; }
+    .type-load_test        { background-color: #fd7e14; color: #fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h4 class="mb-0">
+            <i class="bi bi-file-earmark-text me-2 text-primary"></i>Reports
+        </h4>
+        <p class="text-muted mb-0 mt-1 small">
+            Browse all check runs across all types and environments.
+        </p>
+    </div>
+    <div class="col-auto">
+        <a href="/dashboard" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-house me-1"></i>Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Summary Stats Row -->
+<div class="row g-3 mb-4">
+    {% set total_runs = runs | length %}
+    <div class="col-6 col-md-2">
+        <div class="card env-card p-3 text-center">
+            <div class="stat-number">{{ total_runs }}</div>
+            <div class="stat-label">Total Runs</div>
+        </div>
+    </div>
+    {% for ct_key, ct_label in check_types %}
+    {% set ct_count = by_type.get(ct_key, []) | length %}
+    <div class="col-6 col-md-2">
+        <div class="card env-card p-3 text-center">
+            <div class="stat-number">{{ ct_count }}</div>
+            <div class="stat-label">{{ ct_label }}</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Filter Tabs + Search -->
+<div class="card env-card mb-4">
+    <div class="card-header bg-white border-bottom">
+        <div class="d-flex flex-wrap align-items-center gap-2 justify-content-between">
+            <!-- Filter tabs -->
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/reports/"
+                   class="filter-tab {% if not active_filter %}active{% endif %}">
+                    All
+                    <span class="count-bubble {% if not active_filter %}active{% endif %}">{{ total_runs }}</span>
+                </a>
+                {% for ct_key, ct_label in check_types %}
+                {% set ct_count = by_type.get(ct_key, []) | length %}
+                <a href="/reports/?check_type={{ ct_key }}"
+                   class="filter-tab {% if active_filter == ct_key %}active{% endif %}">
+                    {{ ct_label }}
+                    <span class="count-bubble {% if active_filter == ct_key %}active{% endif %}">{{ ct_count }}</span>
+                </a>
+                {% endfor %}
+            </div>
+
+            <!-- Search -->
+            <div class="search-input-wrap">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input
+                        type="search"
+                        class="form-control border-start-0"
+                        id="reportSearch"
+                        placeholder="Filter by URL, site, env..."
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Runs Table -->
+    <div class="card-body p-0">
+        {% if runs %}
+        <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0" id="reportsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">#</th>
+                        <th>Type</th>
+                        <th>URL</th>
+                        <th>Site</th>
+                        <th>Env</th>
+                        <th>Score</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="reportsTableBody">
+                    {% for run in runs %}
+                    <tr class="run-row"
+                        data-url="{{ run.target_url | lower }}"
+                        data-site="{{ run.site_id | lower }}"
+                        data-env="{{ run.environment | lower }}"
+                        data-type="{{ run.check_type.value }}">
+
+                        <!-- Run ID -->
+                        <td class="ps-4 text-muted small">#{{ run.id }}</td>
+
+                        <!-- Type badge -->
+                        <td>
+                            <span class="badge type-badge type-{{ run.check_type.value }}">
+                                {{ run.check_type.value | replace('_', ' ') | title }}
+                            </span>
+                        </td>
+
+                        <!-- URL -->
+                        <td>
+                            <a href="{{ run.target_url }}" target="_blank"
+                               class="text-decoration-none run-url small"
+                               title="{{ run.target_url }}">
+                                {{ run.target_url | replace('https://', '') | replace('http://', '') }}
+                            </a>
+                        </td>
+
+                        <!-- Site -->
+                        <td class="small">{{ run.site_id }}</td>
+
+                        <!-- Environment -->
+                        <td>
+                            <span class="badge bg-dark" style="font-size: 0.65rem;">{{ run.environment | upper }}</span>
+                        </td>
+
+                        <!-- Score -->
+                        <td>
+                            {% if run.score is not none %}
+                            <span class="badge {% if run.score >= 80 %}bg-success{% elif run.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                {{ run.score | round(1) }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary">--</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Status -->
+                        <td>
+                            {% if run.status.value == 'completed' %}
+                            <span class="d-flex align-items-center gap-1 small">
+                                <span class="status-indicator healthy" style="width:8px;height:8px;"></span>completed
+                            </span>
+                            {% elif run.status.value == 'running' %}
+                            <span class="d-flex align-items-center gap-1 small">
+                                <span class="status-indicator degraded" style="width:8px;height:8px;"></span>running
+                            </span>
+                            {% else %}
+                            <span class="d-flex align-items-center gap-1 small">
+                                <span class="status-indicator unhealthy" style="width:8px;height:8px;"></span>failed
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Time -->
+                        <td class="small text-muted">
+                            <span class="utc-time" data-utc="{{ run.started_at.isoformat() }}">
+                                {{ run.started_at.strftime('%Y-%m-%d %H:%M') }}
+                            </span>
+                        </td>
+
+                        <!-- View Link -->
+                        <td>
+                            {% set link_map = {
+                                'html_validation': '/html-validation/',
+                                'seo_audit': '/seo-audit/',
+                                'lighthouse': '/lighthouse/',
+                                'broken_links': '/broken-links/',
+                                'load_test': '/load-test/'
+                            } %}
+                            {% set base_link = link_map.get(run.check_type.value, '/') %}
+                            <a href="{{ base_link }}?run_id={{ run.id }}"
+                               class="btn btn-outline-secondary btn-sm py-0 px-2"
+                               title="View run #{{ run.id }}">
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </td>
+
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div id="noRunsMsg" class="text-center text-muted py-5 d-none">
+            <i class="bi bi-inbox empty-state-icon"></i>
+            <p class="mt-2 mb-0">No runs match your current filter or search.</p>
+        </div>
+
+        {% else %}
+        <!-- Fully empty -->
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox empty-state-icon"></i>
+            <h5 class="mt-3">No Runs Found</h5>
+            <p class="mb-0">
+                {% if active_filter %}
+                No <strong>{{ active_filter | replace('_', ' ') | title }}</strong> runs have been recorded yet.
+                <a href="/reports/">View all check types</a>.
+                {% else %}
+                No checks have been run yet. Use any of the check pages to get started.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- By-Type Breakdown Cards -->
+{% if not active_filter and by_type %}
+<div class="row g-3">
+    {% for ct_key, ct_label in check_types %}
+    {% set ct_runs = by_type.get(ct_key, []) %}
+    {% if ct_runs %}
+    <div class="col-md-6 col-xl-4">
+        <div class="card env-card">
+            <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">
+                    <span class="badge type-badge type-{{ ct_key }} me-2">{{ ct_label }}</span>
+                    <span class="text-muted small fw-normal">{{ ct_runs | length }} run{{ 's' if ct_runs | length != 1 else '' }}</span>
+                </h6>
+                <a href="/reports/?check_type={{ ct_key }}" class="btn btn-outline-secondary btn-sm py-0 px-2">
+                    View all
+                </a>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for r in ct_runs[:5] %}
+                {% set link_map = {
+                    'html_validation': '/html-validation/',
+                    'seo_audit': '/seo-audit/',
+                    'lighthouse': '/lighthouse/',
+                    'broken_links': '/broken-links/',
+                    'load_test': '/load-test/'
+                } %}
+                <a href="{{ link_map.get(r.check_type.value, '/') }}?run_id={{ r.id }}"
+                   class="list-group-item list-group-item-action px-3 py-2 text-decoration-none">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="text-truncate me-2 small" title="{{ r.target_url }}">
+                            {{ r.target_url | replace('https://', '') | replace('http://', '') | truncate(40) }}
+                        </div>
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                            <span class="badge bg-dark" style="font-size: 0.6rem;">{{ r.environment | upper }}</span>
+                            {% if r.score is not none %}
+                            <span class="badge {% if r.score >= 80 %}bg-success{% elif r.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}" style="font-size: 0.65rem;">
+                                {{ r.score | round(0) | int }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary" style="font-size: 0.65rem;">--</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-muted mt-1" style="font-size: 0.65rem;">
+                        <span class="utc-time" data-utc="{{ r.started_at.isoformat() }}">{{ r.started_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const searchInput = document.getElementById('reportSearch');
+    const tableBody   = document.getElementById('reportsTableBody');
+    const noRunsMsg   = document.getElementById('noRunsMsg');
+
+    if (!searchInput || !tableBody) return;
+
+    function applySearch() {
+        const q = searchInput.value.toLowerCase().trim();
+        const rows = tableBody.querySelectorAll('tr.run-row');
+        let visible = 0;
+
+        rows.forEach(row => {
+            const url  = (row.dataset.url  || '').toLowerCase();
+            const site = (row.dataset.site || '').toLowerCase();
+            const env  = (row.dataset.env  || '').toLowerCase();
+            const text = row.textContent.toLowerCase();
+
+            const match = !q || url.includes(q) || site.includes(q) || env.includes(q) || text.includes(q);
+            row.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+
+        if (noRunsMsg) {
+            noRunsMsg.classList.toggle('d-none', visible > 0);
+        }
+    }
+
+    searchInput.addEventListener('input', applySearch);
+
+});
+</script>
+{% endblock %}

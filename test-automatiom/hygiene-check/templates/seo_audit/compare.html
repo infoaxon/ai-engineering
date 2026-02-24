@@ -1,0 +1,512 @@
+{% extends "base.html" %}
+{% block title %}SEO Audit — Environment Comparison - Hygiene Check{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ---- Column env headers ---- */
+    .env-col-header {
+        border-radius: 0.5rem 0.5rem 0 0;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        font-size: 0.95rem;
+    }
+    .env-col-sit  { background-color: #0d6efd; color: #fff; }
+    .env-col-uat  { background-color: #6f42c1; color: #fff; }
+    .env-col-prod { background-color: #212529; color: #fff; }
+    .env-col-dev  { background-color: #0dcaf0; color: #212529; }
+    .env-col-unknown { background-color: #6c757d; color: #fff; }
+
+    /* ---- Score number ---- */
+    .compare-score-num {
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    /* ---- Grade pill ---- */
+    .grade-pill-lg {
+        font-size: 0.95rem;
+        font-weight: 700;
+        padding: 0.3em 0.85em;
+        border-radius: 2rem;
+    }
+
+    /* ---- Stat chips ---- */
+    .stat-chip-compare {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 0.4rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        min-width: 4.5rem;
+        justify-content: center;
+    }
+    .chip-pass { background-color: #d1e7dd; color: #0a3622; }
+    .chip-fail { background-color: #f8d7da; color: #842029; }
+    .chip-warn { background-color: #fff3cd; color: #664d03; }
+
+    /* ---- Section accordion across columns ---- */
+    .section-row {
+        border-bottom: 1px solid #e9ecef;
+    }
+    .section-row:last-child { border-bottom: none; }
+
+    .section-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #495057;
+        padding: 0.5rem 0.75rem;
+        background-color: #f8f9fa;
+        border-right: 1px solid #e9ecef;
+        min-width: 220px;
+        max-width: 220px;
+    }
+
+    /* ---- Per-cell status counts ---- */
+    .cell-counts {
+        display: flex;
+        gap: 0.3rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 0.5rem;
+    }
+
+    .seo-badge-pass { background-color: #198754; color: #fff; }
+    .seo-badge-fail { background-color: #dc3545; color: #fff; }
+    .seo-badge-warn { background-color: #ffc107; color: #212529; }
+    .seo-badge-info { background-color: #6c757d; color: #fff; }
+
+    /* ---- No data placeholder ---- */
+    .no-data-col {
+        opacity: 0.45;
+    }
+
+    /* ---- Diff highlight ---- */
+    .diff-worse { background-color: #fff5f5; }
+    .diff-better { background-color: #f0fff4; }
+
+    /* ---- Scrollable section table ---- */
+    .section-comparison-wrapper {
+        overflow-x: auto;
+    }
+
+    /* ---- Progress mini bar ---- */
+    .mini-progress {
+        height: 6px;
+        border-radius: 3px;
+        overflow: hidden;
+        background-color: #e9ecef;
+        margin-top: 0.35rem;
+    }
+    .mini-progress .bar-pass { background-color: #198754; display:inline-block; height:100%; }
+    .mini-progress .bar-warn { background-color: #ffc107; display:inline-block; height:100%; }
+    .mini-progress .bar-fail { background-color: #dc3545; display:inline-block; height:100%; }
+
+    /* ---- Responsive score column cards ---- */
+    .score-col-card {
+        border: none;
+        border-radius: 0;
+        border-right: 1px solid #dee2e6;
+    }
+    .score-col-card:last-child { border-right: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ===== Page Header ===== -->
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h4 class="mb-0">
+            <i class="bi bi-columns-gap me-2 text-primary"></i>SEO Audit &mdash; Environment Comparison
+        </h4>
+        <p class="text-muted mb-0 mt-1 small">
+            Side-by-side comparison of the latest SEO audit run across SIT, UAT, and PROD.
+        </p>
+    </div>
+    <div class="col-auto">
+        <a href="/seo-audit/" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-search me-1"></i>Run Audit
+        </a>
+    </div>
+</div>
+
+<!-- ===== Site Selector Form ===== -->
+<div class="card env-card mb-4">
+    <div class="card-header bg-white border-bottom d-flex align-items-center">
+        <i class="bi bi-globe me-2 text-primary"></i>
+        <h6 class="mb-0">Select Site</h6>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="/seo-audit/compare" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label for="siteCompareSelect" class="form-label fw-semibold">Site</label>
+                <select class="form-select" id="siteCompareSelect" name="site_id" onchange="this.form.submit()">
+                    <option value="">-- Select a site --</option>
+                    {% for s in sites %}
+                    <option value="{{ s.site_id }}" {% if site and site.site_id == s.site_id %}selected{% endif %}>
+                        {{ s.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-arrow-repeat me-1"></i>Compare
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if not site %}
+<!-- Empty state: no site chosen -->
+<div class="card env-card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-columns-gap text-muted" style="font-size:3rem;"></i>
+        <h5 class="mt-3 text-muted">No Site Selected</h5>
+        <p class="text-muted mb-0">
+            Choose a site from the dropdown above to view a side-by-side SEO audit comparison<br>
+            across SIT, UAT, and PROD environments.
+        </p>
+    </div>
+</div>
+
+{% elif env_results %}
+<!-- ===== Score Summary Row ===== -->
+{% set envs_ordered = ['sit', 'uat', 'prod'] %}
+
+<div class="card env-card mb-4">
+    <div class="card-header bg-white border-bottom">
+        <h6 class="mb-0">
+            <i class="bi bi-speedometer2 me-2 text-primary"></i>Score Overview &mdash; {{ site.name }}
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="row g-0">
+            {% for env in envs_ordered %}
+            {% if env in env_results %}
+            {% set edata   = env_results[env] %}
+            {% set erun    = edata.get('run') %}
+            {% set esummary = edata.get('summary', {}) %}
+            {% set escore  = esummary.get('overall_score') %}
+
+            <div class="col score-col-card">
+                <!-- Env header band -->
+                <div class="env-col-header env-col-{{ env }} text-center py-2">
+                    <i class="bi bi-server me-1"></i>{{ env | upper }}
+                </div>
+
+                <div class="p-3 text-center">
+                    <!-- Score number -->
+                    <div class="compare-score-num
+                        {% if escore is not none and escore >= 80 %}text-success
+                        {% elif escore is not none and escore >= 60 %}text-warning
+                        {% elif escore is not none %}text-danger
+                        {% else %}text-muted{% endif %}">
+                        {{ escore | int if escore is not none else '--' }}
+                    </div>
+                    <div class="text-muted small mb-2">/ 100</div>
+
+                    <!-- Grade -->
+                    <div class="mb-3">
+                        <span class="grade-pill-lg
+                            {% if escore is not none and escore >= 80 %}bg-success text-white
+                            {% elif escore is not none and escore >= 60 %}bg-warning text-dark
+                            {% elif escore is not none %}bg-danger text-white
+                            {% else %}bg-secondary text-white{% endif %}">
+                            {{ esummary.get('grade', 'N/A') }}
+                        </span>
+                    </div>
+
+                    <!-- Pass / Fail / Warn chips -->
+                    <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
+                        <span class="stat-chip-compare chip-pass">
+                            <i class="bi bi-check-circle"></i>{{ esummary.get('pass_count', 0) }} pass
+                        </span>
+                        <span class="stat-chip-compare chip-fail">
+                            <i class="bi bi-x-circle"></i>{{ esummary.get('fail_count', 0) }} fail
+                        </span>
+                        <span class="stat-chip-compare chip-warn">
+                            <i class="bi bi-exclamation-triangle"></i>{{ esummary.get('warn_count', 0) }} warn
+                        </span>
+                    </div>
+
+                    <!-- Mini score bar -->
+                    {% set sp = esummary.get('pass_count', 0) %}
+                    {% set sf = esummary.get('fail_count', 0) %}
+                    {% set sw = esummary.get('warn_count', 0) %}
+                    {% set st = sp + sf + sw %}
+                    {% if st > 0 %}
+                    <div class="mini-progress mx-auto" style="max-width:160px;">
+                        <span class="bar-pass" style="width:{{ (sp / st * 100) | round(1) }}%;"></span>
+                        <span class="bar-warn" style="width:{{ (sw / st * 100) | round(1) }}%;"></span>
+                        <span class="bar-fail" style="width:{{ (sf / st * 100) | round(1) }}%;"></span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Run meta -->
+                    {% if erun %}
+                    <div class="text-muted mt-3" style="font-size:0.72rem;">
+                        <div>
+                            <i class="bi bi-clock me-1"></i>
+                            <span class="utc-time" data-utc="{{ erun.started_at.isoformat() }}">
+                                {{ erun.started_at.strftime('%Y-%m-%d %H:%M') }}
+                            </span>
+                        </div>
+                        <div class="mt-1 text-truncate" title="{{ erun.target_url }}" style="max-width:100%;">
+                            <i class="bi bi-link-45deg me-1"></i>
+                            <a href="{{ erun.target_url }}" target="_blank" class="text-decoration-none text-muted">
+                                {{ erun.target_url | replace('https://', '') | replace('http://', '') }}
+                            </a>
+                        </div>
+                        <div class="mt-1">
+                            <a href="/seo-audit/?run_id={{ erun.id }}" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size:0.7rem;">
+                                <i class="bi bi-arrow-right me-1"></i>View Full Run
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% else %}
+            <!-- No data for this env -->
+            <div class="col score-col-card no-data-col">
+                <div class="env-col-header env-col-{{ env }} text-center py-2">
+                    <i class="bi bi-server me-1"></i>{{ env | upper }}
+                </div>
+                <div class="p-3 text-center">
+                    <div class="compare-score-num text-muted">--</div>
+                    <div class="text-muted small mt-2">No run found</div>
+                    <div class="mt-3">
+                        {% set env_url = site.get_url(env) %}
+                        {% if env_url %}
+                        <form method="POST" action="/seo-audit/run" class="d-inline">
+                            <input type="hidden" name="url" value="{{ env_url }}">
+                            <input type="hidden" name="site_id" value="{{ site.site_id }}">
+                            <input type="hidden" name="environment" value="{{ env }}">
+                            <input type="hidden" name="remote" value="true">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size:0.75rem;">
+                                <i class="bi bi-play-fill me-1"></i>Run Now
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted small">No URL configured</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- ===== Section-by-Section Breakdown ===== -->
+{% set all_sections = [] %}
+{% for env in envs_ordered %}
+{% if env in env_results %}
+{% for item in env_results[env].get('items', []) %}
+{% set key = (item.section_number, item.section_name) %}
+{% if key not in all_sections %}
+{% set _ = all_sections.append(key) %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+{% if all_sections %}
+<div class="card env-card mb-4">
+    <div class="card-header bg-white border-bottom">
+        <h6 class="mb-0">
+            <i class="bi bi-table me-2 text-primary"></i>Section-by-Section Breakdown
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="section-comparison-wrapper">
+            <table class="table table-sm table-hover mb-0" style="min-width:600px;">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3" style="width:220px;">Section</th>
+                        {% for env in envs_ordered %}
+                        {% if env in env_results or True %}
+                        <th class="text-center" style="width:calc((100% - 220px) / 3);">
+                            <span class="badge env-col-{{ env }} py-1 px-2" style="font-size:0.75rem;">{{ env | upper }}</span>
+                        </th>
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for (sec_num, sec_name) in all_sections | sort(attribute='0') %}
+                    <tr class="section-row">
+                        <!-- Section label -->
+                        <td class="ps-3 py-2 align-middle">
+                            <span class="badge bg-secondary me-1" style="font-size:0.7rem;min-width:1.6rem;">{{ sec_num }}</span>
+                            <span style="font-size:0.8rem;font-weight:600;">{{ sec_name }}</span>
+                        </td>
+
+                        <!-- Per-env cell -->
+                        {% for env in envs_ordered %}
+                        <td class="align-middle text-center py-2">
+                            {% if env in env_results %}
+                            {% set edata = env_results[env] %}
+                            {% set sec_items = edata.get('items', []) | selectattr('section_number', 'equalto', sec_num) | list %}
+                            {% set c_pass = sec_items | selectattr('status.value', 'equalto', 'pass') | list | length %}
+                            {% set c_fail = sec_items | selectattr('status.value', 'equalto', 'fail') | list | length %}
+                            {% set c_warn = sec_items | selectattr('status.value', 'equalto', 'warn') | list | length %}
+                            {% set c_total = sec_items | length %}
+
+                            {% if c_total > 0 %}
+                            <div class="cell-counts">
+                                {% if c_pass > 0 %}
+                                <span class="badge seo-badge-pass" style="font-size:0.68rem;" title="{{ c_pass }} passed">
+                                    <i class="bi bi-check-circle me-1"></i>{{ c_pass }}
+                                </span>
+                                {% endif %}
+                                {% if c_fail > 0 %}
+                                <span class="badge seo-badge-fail" style="font-size:0.68rem;" title="{{ c_fail }} failed">
+                                    <i class="bi bi-x-circle me-1"></i>{{ c_fail }}
+                                </span>
+                                {% endif %}
+                                {% if c_warn > 0 %}
+                                <span class="badge seo-badge-warn" style="font-size:0.68rem;" title="{{ c_warn }} warnings">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>{{ c_warn }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="text-muted small">--</span>
+                            {% endif %}
+
+                            {% else %}
+                            <span class="text-muted small">--</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ===== Items Detail: Failures Only across environments ===== -->
+{% set any_fail = false %}
+{% for env in envs_ordered %}
+{% if env in env_results %}
+{% for item in env_results[env].get('items', []) %}
+{% if item.status.value == 'fail' %}
+{% set any_fail = true %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+{% if any_fail %}
+<div class="card env-card mb-4">
+    <div class="card-header bg-white border-bottom d-flex align-items-center">
+        <i class="bi bi-x-circle me-2 text-danger"></i>
+        <h6 class="mb-0">Failures Across Environments</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Section</th>
+                        <th>Check</th>
+                        {% for env in envs_ordered %}
+                        <th class="text-center" style="width:90px;">
+                            <span class="badge env-col-{{ env }} py-1 px-2" style="font-size:0.72rem;">{{ env | upper }}</span>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {# Collect all unique fail messages across all envs #}
+                    {% set seen_messages = [] %}
+                    {% for env in envs_ordered %}
+                    {% if env in env_results %}
+                    {% for item in env_results[env].get('items', []) %}
+                    {% if item.status.value == 'fail' and item.message not in seen_messages %}
+                    {% set _ = seen_messages.append(item.message) %}
+                    <tr>
+                        <td class="ps-3 align-middle">
+                            <span class="badge bg-secondary" style="font-size:0.68rem;">{{ item.section_number }}</span>
+                            <span class="small ms-1">{{ item.section_name }}</span>
+                        </td>
+                        <td class="align-middle small">{{ item.message }}</td>
+                        {% for check_env in envs_ordered %}
+                        <td class="text-center align-middle">
+                            {% if check_env in env_results %}
+                            {% set match_items = env_results[check_env].get('items', []) | selectattr('message', 'equalto', item.message) | list %}
+                            {% if match_items %}
+                            {% set match_item = match_items[0] %}
+                            {% if match_item.status.value == 'pass' %}
+                            <span class="badge seo-badge-pass" style="font-size:0.65rem;">PASS</span>
+                            {% elif match_item.status.value == 'fail' %}
+                            <span class="badge seo-badge-fail" style="font-size:0.65rem;">FAIL</span>
+                            {% elif match_item.status.value == 'warn' %}
+                            <span class="badge seo-badge-warn" style="font-size:0.65rem;">WARN</span>
+                            {% else %}
+                            <span class="badge seo-badge-info" style="font-size:0.65rem;">INFO</span>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-muted small">--</span>
+                            {% endif %}
+                            {% else %}
+                            <span class="text-muted small">--</span>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<!-- Site selected but no runs exist yet -->
+<div class="card env-card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-inbox text-muted" style="font-size:3rem;"></i>
+        <h5 class="mt-3 text-muted">No Audit Runs Found for {{ site.name }}</h5>
+        <p class="text-muted mb-3">
+            Run an SEO audit for this site in each environment to populate this comparison view.
+        </p>
+        <a href="/seo-audit/" class="btn btn-primary">
+            <i class="bi bi-play-fill me-1"></i>Run SEO Audit
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Convert UTC timestamps to local time (handled by base.html, but ensure it runs)
+    document.querySelectorAll('.utc-time').forEach(el => {
+        const utcTimeStr = el.getAttribute('data-utc');
+        if (utcTimeStr && utcTimeStr !== 'None') {
+            try {
+                const utcDate = new Date(utcTimeStr + (utcTimeStr.endsWith('Z') ? '' : 'Z'));
+                el.textContent = utcDate.toLocaleString();
+            } catch (e) { /* leave as-is */ }
+        }
+    });
+});
+</script>
+{% endblock %}

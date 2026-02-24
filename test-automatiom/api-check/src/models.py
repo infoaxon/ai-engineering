@@ -1,4 +1,5 @@
 """Pydantic models for API configuration and health check results."""
+
 from __future__ import annotations
 
 from datetime import datetime

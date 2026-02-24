@@ -1,0 +1,37 @@
+settings:
+  check_interval_minutes: 60
+  retention_days: 30
+  default_timeout_seconds: 120
+  reports_dir: "./reports"
+  tools_dir: "/Users/shubhamnagar/clonedrepos/liferay-projects/reliance-general-insurance/dolphin-new-omnichannel-digital-platform/tests/html-seo"
+
+tools:
+  html_validate: "html-validate"
+  lighthouse: "lighthouse"
+  seo_script: "${tools_dir}/seo-hygiene-check.sh"
+  broken_links_script: "${tools_dir}/check-broken-links.sh"
+  loadtest_script: "${tools_dir}/load-test/run_loadtest.sh"
+  jmeter_home: "/opt/apache-jmeter"
+
+scoring:
+  weights:
+    html_validation: 0.15
+    seo_audit: 0.30
+    lighthouse: 0.25
+    broken_links: 0.15
+    load_test: 0.15
+
+# Sites are managed via the admin area (Phase 2).
+# A default placeholder site is provided for ad-hoc / manual checks.
+sites:
+  default:
+    name: "InfoAxon Hygiene Check"
+    environments:
+      production:
+        url: ""
+    html_validation:
+      config_path: "${tools_dir}/.htmlvalidate.json"
+    lighthouse:
+      categories: ["seo", "accessibility", "best-practices"]
+    load_test:
+      default_scenario: "smoke"

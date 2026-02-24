@@ -22,3 +22,16 @@ customers:
     - collections/indusind_nippon_life_insurance/1770332518_Communication_APIs.postman_collection.json
     - collections/indusind_nippon_life_insurance.postman_collection.json
     - collections/indusind_nippon_life_insurance/1770332518_Agent_Microsite.postman_collection.json
+  icea_lion:
+    name: ICEA LION
+    description: 'Multiple product APIs for ICEA LION '
+    postman_collection: ''
+    postman_collections:
+    - collections/icea_lion/1770732702_ICEA_LION_-_MOTOR.postman_collection.json
+    - collections/icea_lion/1770732702_ICEA_LION_-_PRS.postman_collection.json
+    - collections/icea_lion/1770732702_INFO_BIP_PRS_SEND_SMS_APIS.postman_collection.json
+    environments:
+    - dev
+    - sit
+    - uat
+    active: true

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Hygiene Check{% endblock %}
+
+{% block content %}
+<!-- Top Bar: Site selector + Environment + Run All -->
+<div class="row mb-4 align-items-center">
+    <div class="col-md-4">
+        <h4 class="mb-0"><i class="bi bi-shield-check me-2"></i>{{ site_name }}</h4>
+    </div>
+    <div class="col-md-8 text-end">
+        <form class="d-inline-flex gap-2" method="get" action="/dashboard">
+            <select name="site" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
+                {% for s in sites %}
+                <option value="{{ s.site_id }}" {% if s.site_id == current_site %}selected{% endif %}>{{ s.name }}</option>
+                {% endfor %}
+            </select>
+            <select name="env" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit()">
+                {% for e in environments %}
+                <option value="{{ e }}" {% if e == current_env %}selected{% endif %}>{{ e|upper }}</option>
+                {% endfor %}
+            </select>
+            <a href="/api/check-all?site_id={{ current_site }}&env={{ current_env }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-play-fill me-1"></i>Run All Checks
+            </a>
+        </form>
+    </div>
+</div>
+
+<!-- Composite Health Score -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card env-card text-center p-4">
+            <h6 class="text-muted text-uppercase mb-3">Composite Health Score</h6>
+            <div class="score-gauge mx-auto" style="width:180px;height:180px;">
+                <canvas id="compositeGauge" width="180" height="180"></canvas>
+                <div class="score-label" style="color: {{ score_color }};">{{ composite_score|round(1) }}</div>
+            </div>
+            <div class="mt-2">
+                <span class="badge {% if composite_score >= 80 %}bg-success{% elif composite_score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %} fs-6">
+                    {{ score_grade }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5 Section Cards -->
+    <div class="col-md-8">
+        <div class="row g-3">
+            {% for check in checks %}
+            <div class="col-md-4">
+                <a href="/{{ check.check_type|replace('_', '-') }}/" class="text-decoration-none">
+                    <div class="card check-card p-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi {{ check.icon }} fs-4 me-2 {% if check.last_score and check.last_score >= 80 %}text-success{% elif check.last_score and check.last_score >= 60 %}text-warning{% elif check.last_score %}text-danger{% else %}text-muted{% endif %}"></i>
+                            <h6 class="mb-0">{{ check.name }}</h6>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {% if check.last_score is not none %}
+                                <span class="stat-number {% if check.last_score >= 80 %}text-success{% elif check.last_score >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                                    {{ check.last_score|round(1) }}
+                                </span>
+                                {% else %}
+                                <span class="stat-number text-muted">--</span>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                {% if check.pass_count or check.fail_count or check.warn_count %}
+                                <small class="d-block text-success">{{ check.pass_count }} pass</small>
+                                <small class="d-block text-danger">{{ check.fail_count }} fail</small>
+                                <small class="d-block text-warning">{{ check.warn_count }} warn</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if check.last_run %}
+                        <small class="text-muted mt-1 d-block">
+                            <i class="bi bi-clock me-1"></i>
+                            <span class="utc-time" data-utc="{{ check.last_run.isoformat() }}">{{ check.last_run.strftime('%Y-%m-%d %H:%M') }}</span>
+                        </small>
+                        {% else %}
+                        <small class="text-muted mt-1 d-block">Never run</small>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-12">
+        <div class="card env-card">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Activity</h6>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>URL</th>
+                            <th>Environment</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for run in recent_runs %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-dark">{{ run.check_type.value|replace('_', ' ')|title }}</span>
+                            </td>
+                            <td class="text-truncate" style="max-width: 300px;">{{ run.target_url }}</td>
+                            <td>{{ run.environment }}</td>
+                            <td>
+                                {% if run.score is not none %}
+                                <span class="badge {% if run.score >= 80 %}bg-success{% elif run.score >= 60 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                    {{ run.score|round(1) }}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">--</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if run.status.value == 'completed' %}
+                                <span class="status-indicator healthy"></span>
+                                {% elif run.status.value == 'running' %}
+                                <span class="status-indicator degraded"></span>
+                                {% else %}
+                                <span class="status-indicator unhealthy"></span>
+                                {% endif %}
+                                {{ run.status.value }}
+                            </td>
+                            <td>
+                                <span class="utc-time" data-utc="{{ run.started_at.isoformat() }}">{{ run.started_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not recent_runs %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                No checks have been run yet. Use the buttons above or the sidebar to run your first check.
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Composite score gauge
+    document.addEventListener('DOMContentLoaded', () => {
+        const score = {{ composite_score }};
+        const color = '{{ score_color }}';
+        drawScoreGauge('compositeGauge', score, color);
+    });
+</script>
+{% endblock %}

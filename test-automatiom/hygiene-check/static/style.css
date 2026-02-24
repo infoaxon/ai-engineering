@@ -1,0 +1,95 @@
+/* Hygiene Check Dashboard - Custom Styles */
+
+/* Score gauge styles */
+.score-gauge-sm {
+    position: relative;
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+}
+
+.score-gauge-sm canvas {
+    display: block;
+}
+
+.score-gauge-sm .score-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+/* Section check items */
+.check-item {
+    padding: 0.5rem 0.75rem;
+    border-left: 3px solid transparent;
+    margin-bottom: 0.25rem;
+    border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.check-item.pass { border-left-color: var(--status-healthy); background-color: rgba(25, 135, 84, 0.05); }
+.check-item.fail { border-left-color: var(--status-unhealthy); background-color: rgba(220, 53, 69, 0.05); }
+.check-item.warn { border-left-color: var(--status-degraded); background-color: rgba(255, 193, 7, 0.05); }
+.check-item.info { border-left-color: var(--status-unknown); background-color: rgba(108, 117, 125, 0.05); }
+
+/* Severity badges */
+.severity-error { background-color: var(--status-unhealthy) !important; }
+.severity-warn { background-color: var(--status-degraded) !important; color: #212529 !important; }
+.severity-info { background-color: var(--status-unknown) !important; }
+.severity-pass { background-color: var(--status-healthy) !important; }
+
+/* Accordion section counters */
+.section-counter {
+    display: inline-block;
+    min-width: 1.5rem;
+    text-align: center;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Compare view */
+.compare-column {
+    border-right: 1px solid #dee2e6;
+}
+
+.compare-column:last-child {
+    border-right: none;
+}
+
+/* Metric delta colors */
+.delta-positive { color: var(--status-healthy); font-weight: 600; }
+.delta-negative { color: var(--status-unhealthy); font-weight: 600; }
+.delta-neutral { color: var(--status-unknown); }
+
+/* Active run highlight */
+.active-run {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-left: 3px solid #0d6efd;
+}
+
+/* Trend sparklines placeholder */
+.sparkline {
+    height: 30px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .navbar .d-flex {
+        flex-wrap: wrap;
+    }
+
+    .navbar .btn-outline-light {
+        margin-bottom: 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+}

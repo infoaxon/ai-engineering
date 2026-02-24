@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+{% block title %}Load Test - Hygiene Check{% endblock %}
+
+{% block extra_css %}
+<style>
+    .metric-card {
+        border: none;
+        border-radius: 0.5rem;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.4rem 0.9rem rgba(0,0,0,0.12);
+    }
+    .metric-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .metric-label {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    .sla-verdict-pass {
+        background-color: #198754;
+        color: #fff;
+    }
+    .sla-verdict-fail {
+        background-color: #dc3545;
+        color: #fff;
+    }
+    .recent-run-item {
+        border-left: 3px solid transparent;
+        transition: border-color 0.2s, background-color 0.2s;
+    }
+    .recent-run-item:hover {
+        border-left-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    .recent-run-item.active-run {
+        border-left-color: #0d6efd;
+        background-color: #e7f1ff;
+    }
+    .scenario-badge {
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h4 class="mb-0">
+            <i class="bi bi-graph-up me-2 text-primary"></i>Load Test
+        </h4>
+        <p class="text-muted mb-0 mt-1 small">
+            Run k6 load test scenarios and inspect throughput, latency percentiles, and SLA verdicts.
+        </p>
+    </div>
+    <div class="col-auto">
+        <a href="/load-test/compare" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-columns-gap me-1"></i>Compare Runs
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- ===== Main Content ===== -->
+    <div class="col-lg-9">
+
+        <!-- Run Form -->
+        <div class="card env-card mb-4">
+            <div class="card-header bg-white border-bottom d-flex align-items-center">
+                <i class="bi bi-play-circle me-2 text-primary"></i>
+                <h6 class="mb-0">Configure &amp; Run Load Test</h6>
+            </div>
+            <div class="card-body">
+                <form id="loadTestForm" class="row g-3" onsubmit="return submitLoadTest(event)">
+
+                    <!-- URL -->
+                    <div class="col-12">
+                        <label for="urlInput" class="form-label fw-semibold">Target URL</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-link-45deg"></i></span>
+                            <input
+                                type="url"
+                                class="form-control"
+                                id="urlInput"
+                                name="url"
+                                placeholder="https://example.com/"
+                                value="{{ run.target_url if run else '' }}"
+                            >
+                        </div>
+                        <div class="form-text">Leave blank to use the site's configured URL for the selected environment.</div>
+                    </div>
+
+                    <!-- Site -->
+                    <div class="col-md-4">
+                        <label for="siteSelect" class="form-label fw-semibold">Site</label>
+                        <select class="form-select" id="siteSelect" name="site_id">
+                            <option value="default">-- Ad-hoc --</option>
+                            {% for site in sites %}
+                            <option value="{{ site.site_id }}" {% if run and run.site_id == site.site_id %}selected{% endif %}>
+                                {{ site.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Environment -->
+                    <div class="col-md-3">
+                        <label for="envSelect" class="form-label fw-semibold">Environment</label>
+                        <select class="form-select" id="envSelect" name="environment">
+                            <option value="production">-- Production --</option>
+                            <option value="dev"  {% if run and run.environment == 'dev'  %}selected{% endif %}>DEV</option>
+                            <option value="sit"  {% if run and run.environment == 'sit'  %}selected{% endif %}>SIT</option>
+                            <option value="uat"  {% if run and run.environment == 'uat'  %}selected{% endif %}>UAT</option>
+                            <option value="prod" {% if run and run.environment == 'prod' %}selected{% endif %}>PROD</option>
+                        </select>
+                    </div>
+
+                    <!-- Scenario -->
+                    <div class="col-md-5">
+                        <label for="scenarioSelect" class="form-label fw-semibold">Scenario</label>
+                        <select class="form-select" id="scenarioSelect" name="scenario">
+                            {% for sc in scenarios %}
+                            <option value="{{ sc }}" {% if result and result.scenario == sc %}selected{% endif %}>
+                                {{ sc | capitalize }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Overrides -->
+                    <div class="col-12">
+                        <p class="form-label fw-semibold mb-2">Overrides <span class="fw-normal text-muted small">(optional - leave blank to use scenario defaults)</span></p>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="hostInput" class="form-label small">Target Host</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="bi bi-hdd-network"></i></span>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="hostInput"
+                                        name="host"
+                                        placeholder="https://host-override.com"
+                                        value="{{ result.target_host if result else '' }}"
+                                    >
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="usersInput" class="form-label small">Virtual Users</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="bi bi-people"></i></span>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        id="usersInput"
+                                        name="users"
+                                        placeholder="e.g. 10"
+                                        min="1"
+                                        value="{{ result.users if result and result.users else '' }}"
+                                    >
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="durationInput" class="form-label small">Duration (seconds)</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="bi bi-stopwatch"></i></span>
+                                    <input
+                                        type="number"
+                                        class="form-control"
+                                        id="durationInput"
+                                        name="duration"
+                                        placeholder="e.g. 60"
+                                        min="1"
+                                        value="{{ result.duration_seconds if result and result.duration_seconds else '' }}"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="col-12 d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary px-4" id="ltSubmitBtn">
+                            <i class="bi bi-play-fill me-1"></i>Run Load Test
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- Live Log Console -->
+        <div id="liveLogConsole"></div>
+
+        {% if run %}
+        <!-- Run Meta -->
+        <div class="card env-card mb-4">
+            <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-clipboard-data me-2 text-primary"></i>
+                    <h6 class="mb-0">Test Results</h6>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-secondary">Run #{{ run.id }}</span>
+                    {% if run.status.value == 'completed' %}
+                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Completed</span>
+                    {% elif run.status.value == 'running' %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i>Running</span>
+                    {% else %}
+                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Failed</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="text-muted small mb-1">
+                    <i class="bi bi-link-45deg me-1"></i>
+                    <a href="{{ run.target_url }}" target="_blank" class="text-decoration-none text-truncate d-inline-block" style="max-width:500px; vertical-align:middle;">
+                        {{ run.target_url }}
+                    </a>
+                </div>
+                <div class="text-muted small">
+                    <i class="bi bi-tag me-1"></i>
+                    <span class="badge bg-dark">{{ run.environment | upper }}</span>
+                    <span class="badge bg-secondary ms-1">{{ run.site_id }}</span>
+                    {% if result %}
+                    <span class="badge bg-info text-dark ms-1 scenario-badge">{{ result.scenario }}</span>
+                    {% endif %}
+                    <i class="bi bi-clock ms-2 me-1"></i>
+                    <span class="utc-time" data-utc="{{ run.started_at.isoformat() }}">{{ run.started_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                {% if run.error_message %}
+                <div class="alert alert-danger mt-3 mb-0 py-2">
+                    <i class="bi bi-exclamation-triangle me-2"></i>{{ run.error_message }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if result %}
+        <!-- SLA Verdict Card -->
+        <div class="card mb-4 sla-verdict-{{ result.sla_overall.value }} border-0">
+            <div class="card-body d-flex align-items-center gap-3 py-3">
+                {% if result.sla_overall.value == 'pass' %}
+                <i class="bi bi-shield-fill-check" style="font-size: 2.5rem;"></i>
+                <div>
+                    <div class="fw-bold fs-5">SLA PASSED</div>
+                    <div style="opacity: 0.85; font-size: 0.85rem;">All performance thresholds met for the <strong>{{ result.scenario }}</strong> scenario.</div>
+                </div>
+                {% else %}
+                <i class="bi bi-shield-fill-x" style="font-size: 2.5rem;"></i>
+                <div>
+                    <div class="fw-bold fs-5">SLA FAILED</div>
+                    <div style="opacity: 0.85; font-size: 0.85rem;">One or more thresholds were exceeded for the <strong>{{ result.scenario }}</strong> scenario.</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="row g-3 mb-4">
+
+            <!-- Throughput -->
+            <div class="col-md-4 col-6">
+                <div class="card metric-card bg-white h-100 p-3 shadow-sm">
+                    <div class="metric-value text-primary">{{ result.throughput | round(2) }}</div>
+                    <div class="metric-label">Req/sec (Throughput)</div>
+                </div>
+            </div>
+
+            <!-- Error Rate -->
+            <div class="col-md-4 col-6">
+                <div class="card metric-card bg-white h-100 p-3 shadow-sm">
+                    <div class="metric-value {% if result.error_rate > 0.05 %}text-danger{% elif result.error_rate > 0.01 %}text-warning{% else %}text-success{% endif %}">
+                        {{ (result.error_rate * 100) | round(2) }}%
+                    </div>
+                    <div class="metric-label">Error Rate</div>
+                </div>
+            </div>
+
+            <!-- P95 -->
+            <div class="col-md-4 col-6">
+                <div class="card metric-card bg-white h-100 p-3 shadow-sm">
+                    <div class="metric-value text-info">{{ result.p95_response_ms | round(0) | int }} ms</div>
+                    <div class="metric-label">P95 Response Time</div>
+                </div>
+            </div>
+
+            <!-- P99 -->
+            <div class="col-md-4 col-6">
+                <div class="card metric-card bg-white h-100 p-3 shadow-sm">
+                    <div class="metric-value text-warning">{{ result.p99_response_ms | round(0) | int }} ms</div>
+                    <div class="metric-label">P99 Response Time</div>
+                </div>
+            </div>
+
+            <!-- Avg -->
+            <div class="col-md-4 col-6">
+                <div class="card metric-card bg-white h-100 p-3 shadow-sm">
+                    <div class="metric-value text-secondary">{{ result.avg_response_ms | round(0) | int }} ms</div>
+                    <div class="metric-label">Avg Response Time</div>
+                </div>
+            </div>
+
+            <!-- Min / Max -->
+            <div class="col-md-4 col-6">
+                <div class="card metric-card bg-white h-100 p-3 shadow-sm">
+                    <div class="d-flex gap-3 align-items-end">
+                        <div>
+                            <div class="metric-value text-success" style="font-size: 1.3rem;">{{ result.min_response_ms | round(0) | int }}</div>
+                            <div class="metric-label">Min (ms)</div>
+                        </div>
+                        <div class="text-muted fs-5 pb-1">/</div>
+                        <div>
+                            <div class="metric-value text-danger" style="font-size: 1.3rem;">{{ result.max_response_ms | round(0) | int }}</div>
+                            <div class="metric-label">Max (ms)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Test Config Summary -->
+        <div class="card env-card mb-4">
+            <div class="card-header bg-white border-bottom">
+                <h6 class="mb-0"><i class="bi bi-gear me-2 text-muted"></i>Test Configuration</h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3 col-6">
+                        <div class="text-muted small">Scenario</div>
+                        <div class="fw-semibold">{{ result.scenario | capitalize }}</div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="text-muted small">Virtual Users</div>
+                        <div class="fw-semibold">{{ result.users }}</div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="text-muted small">Duration</div>
+                        <div class="fw-semibold">{{ result.duration_seconds }}s</div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="text-muted small">Total Requests</div>
+                        <div class="fw-semibold">{{ result.total_requests | default('--') }}</div>
+                    </div>
+                    {% if result.target_host %}
+                    <div class="col-12">
+                        <div class="text-muted small">Target Host Override</div>
+                        <div class="fw-semibold font-monospace small">{{ result.target_host }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% endif %}{# end if result #}
+
+        {% else %}
+        <!-- Empty state -->
+        <div class="card env-card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-graph-up text-muted" style="font-size: 3rem;"></i>
+                <h5 class="mt-3 text-muted">No Load Test Run Selected</h5>
+                <p class="text-muted mb-0">
+                    Configure a scenario above and click <strong>Run Load Test</strong>,<br>
+                    or select a recent run from the sidebar.
+                </p>
+            </div>
+        </div>
+        {% endif %}{# end if run #}
+
+    </div><!-- /col-lg-9 -->
+
+    <!-- ===== Sidebar: Recent Runs ===== -->
+    <div class="col-lg-3">
+        <div class="card env-card">
+            <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">
+                    <i class="bi bi-clock-history me-2 text-primary"></i>Recent Runs
+                </h6>
+                <a href="/load-test/compare" class="btn btn-outline-secondary btn-sm py-0 px-2">
+                    Compare
+                </a>
+            </div>
+            <div class="list-group list-group-flush">
+                {% for r in recent_runs %}
+                <a href="/load-test/?run_id={{ r.id }}"
+                   class="list-group-item list-group-item-action recent-run-item px-3 py-2 {% if run and run.id == r.id %}active-run{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1 me-2" style="min-width: 0;">
+                            <div class="small fw-semibold text-truncate" title="{{ r.target_url }}">
+                                {{ r.target_url | replace('https://', '') | replace('http://', '') }}
+                            </div>
+                            <div class="d-flex align-items-center gap-1 mt-1 flex-wrap">
+                                <span class="badge bg-dark" style="font-size: 0.65rem;">{{ r.environment | upper }}</span>
+                                {% if r.status.value == 'completed' %}
+                                <span class="status-indicator healthy" style="width: 8px; height: 8px;"></span>
+                                {% elif r.status.value == 'running' %}
+                                <span class="status-indicator degraded" style="width: 8px; height: 8px;"></span>
+                                {% else %}
+                                <span class="status-indicator unhealthy" style="width: 8px; height: 8px;"></span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            {% if r.score is not none %}
+                            <span class="badge {% if r.score >= 80 %}bg-success{% elif r.score >= 50 %}bg-warning text-dark{% else %}bg-danger{% endif %}" style="font-size: 0.7rem;">
+                                {{ r.score | round(0) | int }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary" style="font-size: 0.7rem;">--</span>
+                            {% endif %}
+                            <div class="text-muted mt-1" style="font-size: 0.65rem;">
+                                <span class="utc-time" data-utc="{{ r.started_at.isoformat() }}">{{ r.started_at.strftime('%m/%d %H:%M') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {% else %}
+                <div class="list-group-item text-muted text-center py-4 small">
+                    No recent runs yet.
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div><!-- /col-lg-3 -->
+
+</div><!-- /row -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function submitLoadTest(e) {
+    e.preventDefault();
+    const url = document.getElementById('urlInput').value;
+    const siteId = document.getElementById('siteSelect').value;
+    const env = document.getElementById('envSelect').value;
+    const scenario = document.getElementById('scenarioSelect').value;
+    const host = document.getElementById('hostInput').value || null;
+    const users = document.getElementById('usersInput').value ? parseInt(document.getElementById('usersInput').value) : null;
+    const duration = document.getElementById('durationInput').value ? parseInt(document.getElementById('durationInput').value) : null;
+    const btn = document.getElementById('ltSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Starting...';
+    runCheckWithLiveLog({
+        apiUrl: '/api/load-test/run',
+        payload: { url: url || '', site_id: siteId, environment: env, scenario: scenario, host: host, users: users, duration: duration },
+        containerId: 'liveLogConsole',
+        redirectBase: '/load-test/',
+    });
+    return false;
+}
+</script>
+{% endblock %}

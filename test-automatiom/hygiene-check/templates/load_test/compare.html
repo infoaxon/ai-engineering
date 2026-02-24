@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+{% block title %}Compare Load Test Runs - Hygiene Check{% endblock %}
+
+{% block extra_css %}
+<style>
+    .compare-header {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6c757d;
+        font-weight: 600;
+    }
+    .delta-positive {
+        color: #198754;
+        font-weight: 600;
+    }
+    .delta-negative {
+        color: #dc3545;
+        font-weight: 600;
+    }
+    .delta-neutral {
+        color: #6c757d;
+    }
+    .run-meta-badge {
+        font-size: 0.72rem;
+    }
+    .metric-cell {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    .run-selector-card {
+        background: #fff;
+    }
+    .sla-pass {
+        background-color: #d1e7dd;
+        color: #0a3622;
+    }
+    .sla-fail {
+        background-color: #f8d7da;
+        color: #58151c;
+    }
+    .compare-col-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #212529;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h4 class="mb-0">
+            <i class="bi bi-columns-gap me-2 text-primary"></i>Compare Load Test Runs
+        </h4>
+        <p class="text-muted mb-0 mt-1 small">
+            Select two runs to view a side-by-side metrics comparison with deltas.
+        </p>
+    </div>
+    <div class="col-auto">
+        <a href="/load-test/" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-play-circle me-1"></i>New Run
+        </a>
+    </div>
+</div>
+
+<!-- Run Selector -->
+<div class="card env-card mb-4 run-selector-card">
+    <div class="card-header bg-white border-bottom">
+        <h6 class="mb-0"><i class="bi bi-sliders me-2 text-primary"></i>Select Runs to Compare</h6>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="/load-test/compare" class="row g-3 align-items-end">
+
+            <div class="col-md-5">
+                <label for="run1Select" class="form-label fw-semibold">
+                    <i class="bi bi-1-circle-fill text-primary me-1"></i>Run 1 (Baseline)
+                </label>
+                <select class="form-select" id="run1Select" name="run1">
+                    <option value="">-- Select run --</option>
+                    {% for r in recent_runs %}
+                    <option value="{{ r.id }}" {% if run1 and run1.id == r.id %}selected{% endif %}>
+                        #{{ r.id }} &mdash; {{ r.target_url | replace('https://', '') | truncate(40) }} [{{ r.environment | upper }}]
+                        ({{ r.started_at.strftime('%m/%d %H:%M') }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-5">
+                <label for="run2Select" class="form-label fw-semibold">
+                    <i class="bi bi-2-circle-fill text-success me-1"></i>Run 2 (Candidate)
+                </label>
+                <select class="form-select" id="run2Select" name="run2">
+                    <option value="">-- Select run --</option>
+                    {% for r in recent_runs %}
+                    <option value="{{ r.id }}" {% if run2 and run2.id == r.id %}selected{% endif %}>
+                        #{{ r.id }} &mdash; {{ r.target_url | replace('https://', '') | truncate(40) }} [{{ r.environment | upper }}]
+                        ({{ r.started_at.strftime('%m/%d %H:%M') }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-arrow-left-right me-1"></i>Compare
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% if run1 and run2 %}
+<!-- Run Meta Summary Row -->
+<div class="row g-4 mb-4">
+
+    <!-- Run 1 Meta -->
+    <div class="col-md-6">
+        <div class="card env-card h-100">
+            <div class="card-header bg-primary text-white border-0">
+                <h6 class="mb-0"><i class="bi bi-1-circle-fill me-2"></i>Run #{{ run1.id }} &mdash; Baseline</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-muted small mb-1">
+                    <i class="bi bi-link-45deg me-1"></i>
+                    <a href="{{ run1.target_url }}" target="_blank" class="text-decoration-none text-truncate d-inline-block" style="max-width:360px; vertical-align:middle;">
+                        {{ run1.target_url }}
+                    </a>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="badge bg-dark run-meta-badge">{{ run1.environment | upper }}</span>
+                    <span class="badge bg-secondary run-meta-badge">{{ run1.site_id }}</span>
+                    {% if result1 %}
+                    <span class="badge bg-info text-dark run-meta-badge">{{ result1.scenario | capitalize }}</span>
+                    <span class="badge bg-light text-dark border run-meta-badge">{{ result1.users }} VUs / {{ result1.duration_seconds }}s</span>
+                    {% endif %}
+                </div>
+                <div class="text-muted small mt-2">
+                    <i class="bi bi-clock me-1"></i>
+                    <span class="utc-time" data-utc="{{ run1.started_at.isoformat() }}">{{ run1.started_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                {% if result1 %}
+                <div class="mt-2">
+                    <span class="badge px-3 py-2 {% if result1.sla_overall.value == 'pass' %}sla-pass{% else %}sla-fail{% endif %}">
+                        {% if result1.sla_overall.value == 'pass' %}
+                        <i class="bi bi-shield-fill-check me-1"></i>SLA PASS
+                        {% else %}
+                        <i class="bi bi-shield-fill-x me-1"></i>SLA FAIL
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Run 2 Meta -->
+    <div class="col-md-6">
+        <div class="card env-card h-100">
+            <div class="card-header bg-success text-white border-0">
+                <h6 class="mb-0"><i class="bi bi-2-circle-fill me-2"></i>Run #{{ run2.id }} &mdash; Candidate</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-muted small mb-1">
+                    <i class="bi bi-link-45deg me-1"></i>
+                    <a href="{{ run2.target_url }}" target="_blank" class="text-decoration-none text-truncate d-inline-block" style="max-width:360px; vertical-align:middle;">
+                        {{ run2.target_url }}
+                    </a>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="badge bg-dark run-meta-badge">{{ run2.environment | upper }}</span>
+                    <span class="badge bg-secondary run-meta-badge">{{ run2.site_id }}</span>
+                    {% if result2 %}
+                    <span class="badge bg-info text-dark run-meta-badge">{{ result2.scenario | capitalize }}</span>
+                    <span class="badge bg-light text-dark border run-meta-badge">{{ result2.users }} VUs / {{ result2.duration_seconds }}s</span>
+                    {% endif %}
+                </div>
+                <div class="text-muted small mt-2">
+                    <i class="bi bi-clock me-1"></i>
+                    <span class="utc-time" data-utc="{{ run2.started_at.isoformat() }}">{{ run2.started_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                {% if result2 %}
+                <div class="mt-2">
+                    <span class="badge px-3 py-2 {% if result2.sla_overall.value == 'pass' %}sla-pass{% else %}sla-fail{% endif %}">
+                        {% if result2.sla_overall.value == 'pass' %}
+                        <i class="bi bi-shield-fill-check me-1"></i>SLA PASS
+                        {% else %}
+                        <i class="bi bi-shield-fill-x me-1"></i>SLA FAIL
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% if result1 or result2 %}
+<!-- Comparison Table -->
+<div class="card env-card mb-4">
+    <div class="card-header bg-white border-bottom">
+        <h6 class="mb-0"><i class="bi bi-table me-2 text-primary"></i>Metrics Comparison</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4" style="width: 25%;">Metric</th>
+                        <th style="width: 25%;">
+                            <span class="compare-col-label">
+                                <i class="bi bi-1-circle-fill text-primary me-1"></i>Run #{{ run1.id }}
+                            </span>
+                        </th>
+                        <th style="width: 25%;">
+                            <span class="compare-col-label">
+                                <i class="bi bi-2-circle-fill text-success me-1"></i>Run #{{ run2.id }}
+                            </span>
+                        </th>
+                        <th style="width: 25%;">Delta</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    {# Macro: render a metric row. lower_is_better=True means lower run2 value = green delta #}
+                    {% macro metric_row(label, v1, v2, unit, lower_is_better=True, decimals=2) %}
+                    {% set v1_f = v1 | float if v1 is not none else none %}
+                    {% set v2_f = v2 | float if v2 is not none else none %}
+                    <tr>
+                        <td class="ps-4 fw-semibold text-muted small">{{ label }}</td>
+                        <td class="metric-cell">
+                            {% if v1_f is not none %}{{ v1_f | round(decimals) }}{{ unit }}{% else %}<span class="text-muted">--</span>{% endif %}
+                        </td>
+                        <td class="metric-cell">
+                            {% if v2_f is not none %}{{ v2_f | round(decimals) }}{{ unit }}{% else %}<span class="text-muted">--</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if v1_f is not none and v2_f is not none %}
+                            {% set diff = v2_f - v1_f %}
+                            {% if diff == 0 %}
+                            <span class="delta-neutral">&mdash; no change</span>
+                            {% elif lower_is_better %}
+                                {% if diff < 0 %}
+                                <span class="delta-positive"><i class="bi bi-arrow-down me-1"></i>{{ (diff | abs) | round(decimals) }}{{ unit }}</span>
+                                {% else %}
+                                <span class="delta-negative"><i class="bi bi-arrow-up me-1"></i>+{{ diff | round(decimals) }}{{ unit }}</span>
+                                {% endif %}
+                            {% else %}
+                                {% if diff > 0 %}
+                                <span class="delta-positive"><i class="bi bi-arrow-up me-1"></i>+{{ diff | round(decimals) }}{{ unit }}</span>
+                                {% else %}
+                                <span class="delta-negative"><i class="bi bi-arrow-down me-1"></i>{{ diff | round(decimals) }}{{ unit }}</span>
+                                {% endif %}
+                            {% endif %}
+                            {% else %}
+                            <span class="delta-neutral">n/a</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endmacro %}
+
+                    <!-- Throughput (higher is better) -->
+                    {{ metric_row('Throughput (req/s)',
+                        result1.throughput if result1 else none,
+                        result2.throughput if result2 else none,
+                        ' req/s', lower_is_better=False) }}
+
+                    <!-- Error Rate (lower is better) -->
+                    {% set er1 = (result1.error_rate * 100) if result1 else none %}
+                    {% set er2 = (result2.error_rate * 100) if result2 else none %}
+                    {{ metric_row('Error Rate', er1, er2, '%', lower_is_better=True) }}
+
+                    <!-- Avg Response (lower is better) -->
+                    {{ metric_row('Avg Response Time',
+                        result1.avg_response_ms if result1 else none,
+                        result2.avg_response_ms if result2 else none,
+                        ' ms', lower_is_better=True, decimals=0) }}
+
+                    <!-- P95 (lower is better) -->
+                    {{ metric_row('P95 Response Time',
+                        result1.p95_response_ms if result1 else none,
+                        result2.p95_response_ms if result2 else none,
+                        ' ms', lower_is_better=True, decimals=0) }}
+
+                    <!-- P99 (lower is better) -->
+                    {{ metric_row('P99 Response Time',
+                        result1.p99_response_ms if result1 else none,
+                        result2.p99_response_ms if result2 else none,
+                        ' ms', lower_is_better=True, decimals=0) }}
+
+                    <!-- Min (lower is better) -->
+                    {{ metric_row('Min Response Time',
+                        result1.min_response_ms if result1 else none,
+                        result2.min_response_ms if result2 else none,
+                        ' ms', lower_is_better=True, decimals=0) }}
+
+                    <!-- Max (lower is better) -->
+                    {{ metric_row('Max Response Time',
+                        result1.max_response_ms if result1 else none,
+                        result2.max_response_ms if result2 else none,
+                        ' ms', lower_is_better=True, decimals=0) }}
+
+                    <!-- Total Requests (neutral info) -->
+                    <tr>
+                        <td class="ps-4 fw-semibold text-muted small">Total Requests</td>
+                        <td class="metric-cell">{{ result1.total_requests if result1 else '--' }}</td>
+                        <td class="metric-cell">{{ result2.total_requests if result2 else '--' }}</td>
+                        <td class="delta-neutral">
+                            {% if result1 and result2 %}
+                            {% set diff = result2.total_requests - result1.total_requests %}
+                            {% if diff > 0 %}+{{ diff }}{% elif diff < 0 %}{{ diff }}{% else %}&mdash;{% endif %}
+                            {% else %}n/a{% endif %}
+                        </td>
+                    </tr>
+
+                    <!-- SLA Verdict -->
+                    <tr>
+                        <td class="ps-4 fw-semibold text-muted small">SLA Verdict</td>
+                        <td>
+                            {% if result1 %}
+                            <span class="badge {% if result1.sla_overall.value == 'pass' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ result1.sla_overall.value | upper }}
+                            </span>
+                            {% else %}<span class="text-muted">--</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if result2 %}
+                            <span class="badge {% if result2.sla_overall.value == 'pass' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ result2.sla_overall.value | upper }}
+                            </span>
+                            {% else %}<span class="text-muted">--</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if result1 and result2 %}
+                            {% if result1.sla_overall.value == result2.sla_overall.value %}
+                            <span class="delta-neutral">No change</span>
+                            {% elif result2.sla_overall.value == 'pass' %}
+                            <span class="delta-positive"><i class="bi bi-arrow-up-circle me-1"></i>Improved</span>
+                            {% else %}
+                            <span class="delta-negative"><i class="bi bi-arrow-down-circle me-1"></i>Regressed</span>
+                            {% endif %}
+                            {% else %}
+                            <span class="delta-neutral">n/a</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- No result data -->
+<div class="card env-card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-exclamation-circle text-warning" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 text-muted">No Result Data Available</h5>
+        <p class="text-muted mb-0">
+            One or both selected runs have no result records. Ensure the runs completed successfully.
+        </p>
+    </div>
+</div>
+{% endif %}
+
+{% elif run1 or run2 %}
+<!-- Only one run selected -->
+<div class="alert alert-info d-flex align-items-center gap-2">
+    <i class="bi bi-info-circle-fill fs-5"></i>
+    <span>Please select <strong>both</strong> Run 1 and Run 2 to see the comparison table.</span>
+</div>
+
+{% else %}
+<!-- Nothing selected yet -->
+<div class="card env-card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-columns-gap text-muted" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 text-muted">Select Two Runs</h5>
+        <p class="text-muted mb-0">
+            Use the dropdowns above to select a baseline and a candidate run, then click <strong>Compare</strong>.
+        </p>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

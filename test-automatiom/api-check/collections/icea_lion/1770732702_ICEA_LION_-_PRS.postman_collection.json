@@ -1,0 +1,265 @@
+{
+  "info": {
+    "_postman_id": "e748e62f-3660-496e-a346-3e5c94fb06aa",
+    "name": "ICEA LION - PRS",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "21461722"
+  },
+  "item": [
+    {
+      "name": "Salutations API from ICEA LION",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"message_validation\": {\r\n        \"api_user\":\"Info_Axon\",\r\n        \"api_password\": \"5ue55RB\",\r\n        \"token\" : \"CSk6GANFMcAEmtxX8GeP0Q\"\r\n    },\r\n    \"message_route\": {\r\n        \"request_type\": \"Salutations\",\r\n        \"external_ref_number\": \"CSk6GANFMcAEmtxX8GeP0Q\",\r\n        \"interface\" : \"CUSTOMER_INFO\"\r\n    }\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://esb-cloud-uat.icealion.com/KE/Solid/SubmitRequest",
+          "protocol": "https",
+          "host": [
+            "esb-cloud-uat",
+            "icealion",
+            "com"
+          ],
+          "path": [
+            "KE",
+            "Solid",
+            "SubmitRequest"
+          ]
+        },
+        "description": "USING TOKEN to fetch the data"
+      },
+      "response": []
+    },
+    {
+      "name": "ESB TOKEN",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"message_validation\": {\r\n        \"api_user\": \"Info_Axon\",\r\n        \"api_password\": \"5ue55RB\"\r\n    },\r\n        \"message_route\": {\r\n            \"interface\":\"TOKEN\"\r\n        }\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://esb-cloud-uat.icealion.com/KE/Solid/SubmitRequest",
+          "protocol": "https",
+          "host": [
+            "esb-cloud-uat",
+            "icealion",
+            "com"
+          ],
+          "path": [
+            "KE",
+            "Solid",
+            "SubmitRequest"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "New Lead Onboarding",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"message_body\": {\r\n        \"AccountName\": \"SAURABH'S ACCOUNT NAME\",\r\n        \"AccountNo\": \"8299848556\",\r\n        \"Address\": \"POSTAL ADDRESS VALUE\",\r\n        \"AgentID\": \"18407\",\r\n        \"BankBranch\": \"797\",\r\n        \"BankName\": \"238\",\r\n        \"BankReceiptImage\": \"\",\r\n        \"ContributionAmount\": \"\",\r\n        \"ContributionFrequency\": \"10\",\r\n        \"Country\": \"3\",\r\n        \"DateOfBirth\": \"1997-10-18T00:00:00Z\",\r\n        \"DepositAmount\": \"\",\r\n        \"DoneBy\": \"PRSMicrositeUser\",\r\n        \"Email\": \"saurabh.pandey@infoaxon.com\",\r\n        \"Employed\": \"1\",\r\n        \"Employer\": \"InfoAxon Innovations Pvt Ltd\",\r\n        \"FactForm\": \"Nairobi.png\",\r\n        \"FirstName\": \"Rishabh\",\r\n        \"Gender\": \"M\",\r\n        \"HowDidYouHearAboutUs\": \"Friend/Family\",\r\n        \"IDBackIDPicture\": \"\",\r\n        \"IDFrontIDPicture\": \"Nairobi.png\",\r\n        \"IDNo\": \"123456789\",\r\n        \"IDType\": \"1\",\r\n        \"IncomeSavingsPercentage\": \"\",\r\n        \"InitialAmount\": \"\",\r\n        \"KRADocument\": \"Nairobi.png\",\r\n        \"KRAPIN\": \"L987654321L\",\r\n        \"LastName\": \"Pandey\",\r\n        \"LeadId\": \"1107\",\r\n        \"Location\": \"POSTAL ADDRESS VALUE\",\r\n        \"MPesaMobNo\": \"\",\r\n        \"MiddleName\": \"Kumar\",\r\n        \"MobileNo1\": \"+254715715712\",\r\n        \"MobileNo2\": \"7156717811\",\r\n        \"MonthlyIncome\": \"\",\r\n        \"Nationality\": \"3\",\r\n        \"Occupation\": \"6\",\r\n        \"OTP\": \"\",\r\n        \"PassportExpiryDate\": \"\",\r\n        \"PassportPicture\": \"\",\r\n        \"PaymentOptions\": \"1\",\r\n        \"PaymentRef\": \"\",\r\n        \"PaymentStatus\": \"false\",\r\n        \"PaymentTransDate\": \"\",\r\n        \"PhysicalAddress\": \"RESIDENTIAL ADDRESSED\",\r\n        \"PostalCode\": \"70103\",\r\n        \"ProductType\": \"Pension fund\",\r\n        \"Progress\": \"6\",\r\n        \"RedirectUrl\": \"\",\r\n        \"RetirementAge\": \"50\",\r\n        \"RTGSCashDocumentUrl\": \"\",\r\n        \"Salutation\": \"Mr.\",\r\n        \"SaveForLaterUrl\": \"\",\r\n        \"SelfEmployed\": \"0\",\r\n        \"SelfPassportPicture\": \"Nairobi.png\",\r\n        \"SourceOfFunds\": \"Salary\",\r\n        \"TargetRetirementAmount\": \"\",\r\n        \"TaxExemptionCert\": \"opt-tax-exemption-certificate-camera-2025-10-11T10-02-59-536Z.jpg\",\r\n        \"Token\": \"\",\r\n        \"Town\": \"6904\",\r\n        \"Type\": \"update\"\r\n    },\r\n    \"message_route\": {\r\n        \"external_ref_number\": \"0PEIVhlCjNbXWVsWOaoqPA51\",\r\n        \"interface\": \"CUSTOMER_INFO\",\r\n        \"request_type\": \"prsmicrositeOnboardingDataLeads\"\r\n    },\r\n    \"message_validation\": {\r\n        \"api_password\": \"5ue55RB\",\r\n        \"api_user\": \"Info_Axon\",\r\n        \"token\": \"0PEIVhlCjNbXWVsWOaoqPA\"\r\n    }\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://esb-cloud-uat.icealion.com/KE/Solid/SubmitRequest",
+          "protocol": "https",
+          "host": [
+            "esb-cloud-uat",
+            "icealion",
+            "com"
+          ],
+          "path": [
+            "KE",
+            "Solid",
+            "SubmitRequest"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Generic Document Upload",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "uuid": "1d70c827-4bec-44f4-8b0f-cf58f967c94e",
+              "src": "/C:/Users/saurabh.pandey/Downloads/Advanced-RAG.png"
+            },
+            {
+              "key": "type",
+              "value": "IDFront",
+              "type": "text",
+              "uuid": "4965f884-1871-4be2-979e-1eb881591a09"
+            },
+            {
+              "key": "id_no",
+              "value": "33636729",
+              "type": "text",
+              "uuid": "f78cc723-7528-4dbc-9893-c503184ce1e2"
+            },
+            {
+              "key": "product",
+              "value": "PRS",
+              "type": "text",
+              "uuid": "09920012-0c8c-4d87-b8d7-617fa45175bb"
+            }
+          ]
+        },
+        "url": {
+          "raw": "https://icealiondocservice-prod.icealion.com/documentapi/upload",
+          "protocol": "https",
+          "host": [
+            "icealiondocservice-prod",
+            "icealion",
+            "com"
+          ],
+          "path": [
+            "documentapi",
+            "upload"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "LEAD DETAILS",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "Confirm MPESA",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"message_validation\": {\r\n        \"api_user\": \"Info_Axon\",\r\n        \"api_password\": \"5ue55RB\",\r\n        \"token\": \"9ZeCiRWGvQlQUa+vuDGLtQ\"\r\n    },\r\n    \"message_route\": {\r\n        \"request_type\": \"MpesaDigiPaymentConf\",\r\n        \"external_ref_number\": \"9ZeCiRWGvQlQUa2+vuDGLtQ\",\r\n        \"interface\": \"CUSTOMER_INFO\"\r\n    },\r\n    \"message_body\": {\r\n        \"BillRefNumber\": \"PRS-123453456\"\r\n    }\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://esb-cloud-uat.icealion.com/KE/Solid/SubmitRequest",
+          "protocol": "https",
+          "host": [
+            "esb-cloud-uat",
+            "icealion",
+            "com"
+          ],
+          "path": [
+            "KE",
+            "Solid",
+            "SubmitRequest"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PRS CalculateRetirementAmount",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n   \"message_validation\": {\n       \"api_user\": \"Info_Axon\",\n       \"api_password\": \"5ue55RB\",\n       \"token\": \"+fKrHTtUcZm23OSt9aaW9A\"\n   },\n   \"message_route\": {\n       \"request_type\": \"CalculateRetirementAmount\",\n       \"external_ref_number\": \"+fKrHTtUcZ1m23OSt9aaW9A\",\n       \"interface\": \"CUSTOMER_INFO\"\n   },\n   \"message_body\": {\n        \"MonthlyContribution\": \"40000.00\",\n        \"CurrentAge\": \"40\",\n        \"RetirementAge\": \"60\",\n        \"InitialAmount\": \"100000.00\",\n        \"InterestRate\": \"10\",\n        \"AnnualIncreaseRate\": \"10\"\n   }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://esb-cloud.icealion.com/KE/Solid/SubmitRequest",
+          "protocol": "https",
+          "host": [
+            "esb-cloud",
+            "icealion",
+            "com"
+          ],
+          "path": [
+            "KE",
+            "Solid",
+            "SubmitRequest"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PRS CalculateRetirementContribution",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n   \"message_validation\": {\n       \"api_user\": \"Info_Axon\",\n       \"api_password\": \"5ue55RB\",\n       \"token\": \"+fKrHTtUcZm23OSt9aaW9A\"\n   },\n   \"message_route\": {\n       \"request_type\": \"CalculateRetirementContribution\",\n       \"external_ref_number\": \"+fKrH3TtUcZm23OSt119aaW9A\",\n       \"interface\": \"CUSTOMER_INFO\"\n   },\n   \"message_body\": {\n        \"TargetRetirementAmount\": \"1000000.00\",\n        \"CurrentAge\": \"40\",\n        \"RetirementAge\": \"65\",\n        \"InterestRate\": \"10\"\n   }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://esb-cloud.icealion.com/KE/Solid/SubmitRequest",
+          "protocol": "https",
+          "host": [
+            "esb-cloud",
+            "icealion",
+            "com"
+          ],
+          "path": [
+            "KE",
+            "Solid",
+            "SubmitRequest"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

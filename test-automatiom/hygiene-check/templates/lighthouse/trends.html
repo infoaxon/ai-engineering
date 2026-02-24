@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+{% block title %}Lighthouse Trends - Hygiene Check{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trend-chart-container {
+        position: relative;
+        height: 360px;
+    }
+    .selector-card {
+        background: #fff;
+    }
+    .env-tab.active {
+        background-color: #212529;
+        color: #fff;
+        border-color: #212529;
+    }
+    .legend-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 0.3rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h4 class="mb-0">
+            <i class="bi bi-graph-up me-2 text-primary"></i>Lighthouse Score Trends
+        </h4>
+        <p class="text-muted mb-0 mt-1 small">
+            Track performance, accessibility, best-practices, and SEO scores over time for a given site and environment.
+        </p>
+    </div>
+    <div class="col-auto">
+        <a href="/lighthouse/" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-speedometer me-1"></i>Run Audit
+        </a>
+    </div>
+</div>
+
+<!-- Site / Environment Selector -->
+<div class="card env-card mb-4 selector-card">
+    <div class="card-header bg-white border-bottom">
+        <h6 class="mb-0"><i class="bi bi-sliders me-2 text-primary"></i>Select Site &amp; Environment</h6>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="/lighthouse/trends" class="row g-3 align-items-end">
+
+            <div class="col-md-5">
+                <label for="siteSelect" class="form-label fw-semibold">Site</label>
+                <select class="form-select" id="siteSelect" name="site_id">
+                    <option value="">-- Select a site --</option>
+                    {% for site in sites %}
+                    <option value="{{ site.site_id }}" {% if site.site_id == site_id %}selected{% endif %}>
+                        {{ site.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="envSelect" class="form-label fw-semibold">Environment</label>
+                <select class="form-select" id="envSelect" name="env">
+                    <option value="">-- Select env --</option>
+                    {% for e in ['dev', 'sit', 'uat', 'prod'] %}
+                    <option value="{{ e }}" {% if e == env %}selected{% endif %}>{{ e | upper }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-bar-chart-line me-1"></i>Load Trends
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% if site_id and env %}
+<!-- Chart Card -->
+<div class="card env-card mb-4">
+    <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between">
+        <div>
+            <h6 class="mb-0">
+                <i class="bi bi-activity me-2 text-primary"></i>Score History
+                &mdash;
+                <span class="badge bg-dark ms-1">{{ site_id }}</span>
+                <span class="badge bg-secondary ms-1">{{ env | upper }}</span>
+            </h6>
+        </div>
+        <div class="d-flex gap-3 align-items-center" style="font-size: 0.8rem;">
+            <span><span class="legend-dot" style="background:#0d6efd;"></span>Performance</span>
+            <span><span class="legend-dot" style="background:#198754;"></span>Accessibility</span>
+            <span><span class="legend-dot" style="background:#fd7e14;"></span>Best Practices</span>
+            <span><span class="legend-dot" style="background:#6f42c1;"></span>SEO</span>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if trend_data and trend_data != '[]' %}
+        <div class="trend-chart-container">
+            <canvas id="trendsChart"></canvas>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-bar-chart-line" style="font-size: 3rem;"></i>
+            <h5 class="mt-3">No Trend Data</h5>
+            <p class="mb-0">No completed Lighthouse runs found for <strong>{{ site_id }}</strong> / <strong>{{ env | upper }}</strong>.<br>
+               Run an audit first to start building trend history.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Data Table -->
+{% if trend_data and trend_data != '[]' %}
+<div class="card env-card">
+    <div class="card-header bg-white border-bottom">
+        <h6 class="mb-0"><i class="bi bi-table me-2 text-primary"></i>Raw Data</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0" id="trendTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Timestamp</th>
+                        <th>Performance</th>
+                        <th>Accessibility</th>
+                        <th>Best Practices</th>
+                        <th>SEO</th>
+                        <th>Overall Score</th>
+                    </tr>
+                </thead>
+                <tbody id="trendTableBody">
+                    <!-- Populated by JS from trend_data -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<!-- Prompt to select -->
+<div class="card env-card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-graph-up text-muted" style="font-size: 3rem;"></i>
+        <h5 class="mt-3 text-muted">Select a Site and Environment</h5>
+        <p class="text-muted mb-0">Use the filters above to load score trend data.</p>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const rawData = {{ trend_data | safe }};
+    if (!Array.isArray(rawData) || rawData.length === 0) return;
+
+    // --- Parse data ---
+    const labels       = rawData.map(d => {
+        const dt = new Date(d.timestamp + (d.timestamp.endsWith('Z') ? '' : 'Z'));
+        return dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    });
+    const toScorePct   = v => v !== null && v !== undefined ? Math.round(v * 100) : null;
+
+    const performanceData    = rawData.map(d => toScorePct(d.performance));
+    const accessibilityData  = rawData.map(d => toScorePct(d.accessibility));
+    const bestPracticesData  = rawData.map(d => toScorePct(d.best_practices));
+    const seoData            = rawData.map(d => toScorePct(d.seo));
+    const overallData        = rawData.map(d => d.score !== undefined ? Math.round(d.score) : null);
+
+    // --- Chart ---
+    const ctx = document.getElementById('trendsChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Performance',
+                        data: performanceData,
+                        borderColor: '#0d6efd',
+                        backgroundColor: 'rgba(13,110,253,0.08)',
+                        fill: false,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        spanGaps: true,
+                    },
+                    {
+                        label: 'Accessibility',
+                        data: accessibilityData,
+                        borderColor: '#198754',
+                        backgroundColor: 'rgba(25,135,84,0.08)',
+                        fill: false,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        spanGaps: true,
+                    },
+                    {
+                        label: 'Best Practices',
+                        data: bestPracticesData,
+                        borderColor: '#fd7e14',
+                        backgroundColor: 'rgba(253,126,20,0.08)',
+                        fill: false,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        spanGaps: true,
+                    },
+                    {
+                        label: 'SEO',
+                        data: seoData,
+                        borderColor: '#6f42c1',
+                        backgroundColor: 'rgba(111,66,193,0.08)',
+                        fill: false,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        spanGaps: true,
+                    },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y !== null ? ctx.parsed.y : 'n/a'}`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 30,
+                            font: { size: 11 },
+                            maxTicksLimit: 12,
+                        },
+                        grid: { display: false }
+                    },
+                    y: {
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            stepSize: 25,
+                            callback: v => v,
+                            font: { size: 11 },
+                        },
+                        grid: { color: 'rgba(0,0,0,0.05)' }
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Populate table ---
+    const tbody = document.getElementById('trendTableBody');
+    if (tbody) {
+        rawData.forEach((d, i) => {
+            const dt = new Date(d.timestamp + (d.timestamp.endsWith('Z') ? '' : 'Z'));
+            const fmt = dt.toLocaleString();
+            const p   = performanceData[i];
+            const a   = accessibilityData[i];
+            const bp  = bestPracticesData[i];
+            const s   = seoData[i];
+            const ov  = overallData[i];
+
+            function scoreBadge(v) {
+                if (v === null) return '<span class="badge bg-secondary">--</span>';
+                const cls = v >= 90 ? 'bg-success' : v >= 50 ? 'bg-warning text-dark' : 'bg-danger';
+                return `<span class="badge ${cls}">${v}</span>`;
+            }
+
+            tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td class="ps-3 small text-muted">${fmt}</td>
+                    <td>${scoreBadge(p)}</td>
+                    <td>${scoreBadge(a)}</td>
+                    <td>${scoreBadge(bp)}</td>
+                    <td>${scoreBadge(s)}</td>
+                    <td>${scoreBadge(ov)}</td>
+                </tr>
+            `);
+        });
+    }
+
+});
+</script>
+{% endblock %}
