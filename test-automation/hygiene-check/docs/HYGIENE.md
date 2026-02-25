@@ -241,6 +241,10 @@ python3 cli.py loadtest run [SCENARIO] [OPTIONS]
 | `--users`         | integer | `None`       | Override virtual user count                    |
 | `--duration`      | integer | `None`       | Override duration in seconds                   |
 | `--jmeter`        | flag    | `False`      | Force JMeter mode (requires JMeter installed)  |
+| `--sla-error`     | float   | `2.0`        | Max error rate %                               |
+| `--sla-p95`       | integer | `3000`       | Max P95 response time in ms                    |
+| `--sla-p99`       | integer | `5000`       | Max P99 response time in ms                    |
+| `--sla-throughput` | float  | `10.0`       | Min throughput in req/s                        |
 | `--ci`            | flag    | `False`      | CI mode                                        |
 | `--site-id`       | string  | `default`    | Site identifier                                |
 | `--environment`   | string  | `production` | Environment name                               |
@@ -255,14 +259,14 @@ python3 cli.py loadtest run [SCENARIO] [OPTIONS]
 | soak     | 30    | 600s     | 60s     | 2--4s        |
 | spike    | 150   | 120s     | 10s     | 0.2--0.5s    |
 
-**SLA thresholds:**
+**SLA thresholds (defaults, override with flags):**
 
-| Metric       | Threshold        |
-|--------------|------------------|
-| Error rate   | <= 2%            |
-| P95 response | <= 3000ms        |
-| P99 response | <= 5000ms        |
-| Throughput   | >= 10 req/s      |
+| Metric       | Default          | Flag               |
+|--------------|------------------|--------------------|
+| Error rate   | <= 2%            | `--sla-error`      |
+| P95 response | <= 3000ms        | `--sla-p95`        |
+| P99 response | <= 5000ms        | `--sla-p99`        |
+| Throughput   | >= 10 req/s      | `--sla-throughput`  |
 
 **Examples:**
 
@@ -284,6 +288,9 @@ python3 cli.py loadtest run soak --host ppdolphin.brobotinsurance.com
 
 # Spike test
 python3 cli.py loadtest run spike --host ppdolphin.brobotinsurance.com
+
+# Custom SLA thresholds
+python3 cli.py loadtest run smoke --host ppdolphin.brobotinsurance.com --sla-error 5 --sla-p95 5000 --sla-throughput 5
 
 # CI mode (JSON output, exit code 1 on SLA fail)
 python3 cli.py loadtest run smoke --host ppdolphin.brobotinsurance.com --ci

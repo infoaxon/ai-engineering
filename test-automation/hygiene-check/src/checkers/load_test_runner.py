@@ -59,6 +59,7 @@ class LoadTestRunner(BaseChecker):
             users=users,
             duration=duration,
             run_log=run_log,
+            sla=kwargs.get("sla"),
         )
 
         if run_log:
@@ -118,6 +119,15 @@ class LoadTestRunner(BaseChecker):
             cmd.append(f"--duration={duration}")
             log(f"Duration: {duration}s", "info")
 
+        # Pass SLA overrides to shell script
+        sla = kwargs.get("sla") or {}
+        if "error_rate" in sla:
+            cmd.append(f"--sla-error={sla['error_rate']}")
+        if "p95_ms" in sla:
+            cmd.append(f"--sla-p95={sla['p95_ms']}")
+        if "p99_ms" in sla:
+            cmd.append(f"--sla-p99={sla['p99_ms']}")
+
         log("Starting JMeter load test — this may take several minutes...", "info")
         if run_log:
             run_log.progress_pct = 20
@@ -128,23 +138,29 @@ class LoadTestRunner(BaseChecker):
             log(f"Load test timed out after {self.timeout}s", "error")
             raise TimeoutError(f"Load test timed out after {self.timeout}s")
 
-        # Check for non-zero exit code (script failure)
-        if result.returncode != 0:
-            from ..utils.shell import strip_ansi
-            # Script outputs errors to stdout via echo; stderr may be empty
-            stderr_clean = strip_ansi(result.stderr.strip())
-            stdout_clean = strip_ansi(result.stdout.strip())
-            last_line = stdout_clean.splitlines()[-1] if stdout_clean else ""
-            error_msg = stderr_clean or last_line or f"JMeter script exited with code {result.returncode}"
-            log(f"JMeter failed: {error_msg}", "error")
-            raise RuntimeError(f"JMeter load test failed: {error_msg}")
-
         log(f"JMeter finished (exit code {result.returncode})", "info")
         if run_log:
             run_log.progress_pct = 60
 
         log("Parsing load test results...", "info")
         parsed = parse_loadtest_output(result.stdout + result.stderr)
+
+        # If exit code is non-zero and we got no parseable results, it's a real failure.
+        # Exit code 1 with valid results means SLA breach — that's expected, not a crash.
+        if result.returncode != 0 and not parsed.get("total_requests"):
+            from ..utils.shell import strip_ansi
+            stderr_clean = strip_ansi(result.stderr.strip())
+            stdout_clean = strip_ansi(result.stdout.strip())
+            # Filter out harmless Java/JMeter warnings from stderr
+            stderr_lines = [
+                ln for ln in stderr_clean.splitlines()
+                if not ln.startswith("WARNING:") and not ln.startswith("WARN ")
+            ]
+            stderr_useful = "\n".join(stderr_lines).strip()
+            last_line = stdout_clean.splitlines()[-1] if stdout_clean else ""
+            error_msg = stderr_useful or last_line or f"JMeter script exited with code {result.returncode}"
+            log(f"JMeter failed: {error_msg}", "error")
+            raise RuntimeError(f"JMeter load test failed: {error_msg}")
 
         if parsed.get("total_requests"):
             log(f"Total requests: {parsed['total_requests']}", "info")

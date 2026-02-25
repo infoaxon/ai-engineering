@@ -57,13 +57,20 @@ class HttpLoadTester:
         users: int | None = None,
         duration: int | None = None,
         run_log: RunLog | None = None,
+        sla: dict | None = None,
     ) -> dict:
         """Run load test and return parsed results dict.
 
         The returned dict matches the format of parse_loadtest_output()
         so it can be used directly by LoadTestRunner.
+
+        sla: optional dict to override SLA thresholds. Keys:
+            error_rate (float), p95_ms (int), p99_ms (int), throughput (float)
         """
         log = run_log.add if run_log else lambda msg, lvl="info": None
+
+        # Merge SLA overrides with defaults
+        self._sla = {**SLA_DEFAULTS, **(sla or {})}
 
         cfg = SCENARIOS.get(scenario, SCENARIOS["smoke"])
         num_users = users if users is not None else cfg["users"]
@@ -219,20 +226,21 @@ class HttpLoadTester:
         p95_ms = _percentile(times, 95)
         p99_ms = _percentile(times, 99)
 
-        # SLA checks
+        # SLA checks (use instance overrides merged with defaults)
+        sla = self._sla
         sla_pass = True
-        if error_rate > SLA_DEFAULTS["error_rate"]:
+        if error_rate > sla["error_rate"]:
             sla_pass = False
-            log(f"SLA BREACH: Error rate {error_rate:.2f}% > {SLA_DEFAULTS['error_rate']}%", "error")
-        if p95_ms > SLA_DEFAULTS["p95_ms"]:
+            log(f"SLA BREACH: Error rate {error_rate:.2f}% > {sla['error_rate']}%", "error")
+        if p95_ms > sla["p95_ms"]:
             sla_pass = False
-            log(f"SLA BREACH: P95 {p95_ms:.0f}ms > {SLA_DEFAULTS['p95_ms']}ms", "error")
-        if p99_ms > SLA_DEFAULTS["p99_ms"]:
+            log(f"SLA BREACH: P95 {p95_ms:.0f}ms > {sla['p95_ms']}ms", "error")
+        if p99_ms > sla["p99_ms"]:
             sla_pass = False
-            log(f"SLA BREACH: P99 {p99_ms:.0f}ms > {SLA_DEFAULTS['p99_ms']}ms", "error")
-        if throughput < SLA_DEFAULTS["throughput"] and total > 0:
+            log(f"SLA BREACH: P99 {p99_ms:.0f}ms > {sla['p99_ms']}ms", "error")
+        if throughput < sla["throughput"] and total > 0:
             sla_pass = False
-            log(f"SLA BREACH: Throughput {throughput:.2f} req/s < {SLA_DEFAULTS['throughput']} req/s", "error")
+            log(f"SLA BREACH: Throughput {throughput:.2f} req/s < {sla['throughput']} req/s", "error")
 
         sla_overall = "pass" if sla_pass else "fail"
 
@@ -245,15 +253,15 @@ class HttpLoadTester:
         log(f"Total Requests: {total:,}", "info")
         log(f"Failures: {failures:,}", "info")
         err_level = "success" if error_rate < 1 else "error"
-        err_sla = "PASS" if error_rate <= SLA_DEFAULTS["error_rate"] else "FAIL"
+        err_sla = "PASS" if error_rate <= sla["error_rate"] else "FAIL"
         log(f"Error Rate: {error_rate:.2f}% [{err_sla}]", err_level)
-        tp_sla = "PASS" if throughput >= SLA_DEFAULTS["throughput"] else "FAIL"
+        tp_sla = "PASS" if throughput >= sla["throughput"] else "FAIL"
         log(f"Throughput: {throughput:.2f} req/s [{tp_sla}]", "info")
         log(f"Min: {min_ms:.0f}ms", "info")
         log(f"Avg: {avg_ms:.0f}ms", "info")
-        p95_sla = "PASS" if p95_ms <= SLA_DEFAULTS["p95_ms"] else "FAIL"
+        p95_sla = "PASS" if p95_ms <= sla["p95_ms"] else "FAIL"
         log(f"P95: {p95_ms:.0f}ms [{p95_sla}]", "info")
-        p99_sla = "PASS" if p99_ms <= SLA_DEFAULTS["p99_ms"] else "FAIL"
+        p99_sla = "PASS" if p99_ms <= sla["p99_ms"] else "FAIL"
         log(f"P99: {p99_ms:.0f}ms [{p99_sla}]", "info")
         log(f"Max: {max_ms:.0f}ms", "info")
 

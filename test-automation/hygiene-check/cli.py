@@ -597,6 +597,10 @@ def loadtest_run(
     users: Optional[int] = typer.Option(None, help="Number of users override"),
     duration: Optional[int] = typer.Option(None, help="Duration override (seconds)"),
     jmeter: bool = typer.Option(False, "--jmeter", help="Force JMeter mode (requires JMeter installed)"),
+    sla_error: Optional[float] = typer.Option(None, "--sla-error", help="Max error rate % (default: 2.0)"),
+    sla_p95: Optional[int] = typer.Option(None, "--sla-p95", help="Max P95 response time in ms (default: 3000)"),
+    sla_p99: Optional[int] = typer.Option(None, "--sla-p99", help="Max P99 response time in ms (default: 5000)"),
+    sla_throughput: Optional[float] = typer.Option(None, "--sla-throughput", help="Min throughput req/s (default: 10.0)"),
     ci: bool = typer.Option(False, "--ci", help="CI mode"),
     site_id: str = typer.Option("default", help="Site identifier"),
     environment: str = typer.Option("production", help="Environment name"),
@@ -618,12 +622,24 @@ def loadtest_run(
     else:
         url = ""
 
+    # Build SLA overrides dict (only include values the user actually set)
+    sla_overrides = {}
+    if sla_error is not None:
+        sla_overrides["error_rate"] = sla_error
+    if sla_p95 is not None:
+        sla_overrides["p95_ms"] = sla_p95
+    if sla_p99 is not None:
+        sla_overrides["p99_ms"] = sla_p99
+    if sla_throughput is not None:
+        sla_overrides["throughput"] = sla_throughput
+
     async def _run():
         await storage.initialize()
         return await checker.run(url, site_id=site_id, environment=environment,
                                   triggered_by=TriggeredBy.CLI,
                                   scenario=scenario, host=host, users=users,
-                                  duration=duration, jmeter=jmeter)
+                                  duration=duration, jmeter=jmeter,
+                                  sla=sla_overrides if sla_overrides else None)
 
     with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), console=console) as progress:
         progress.add_task(f"Running {scenario} load test...", total=None)
